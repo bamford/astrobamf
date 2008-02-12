@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Perform daily backups of system volumes
+
+# Arguments are volume_name backup_size buffer_size
+
+# backup_size: This currently only has an effect the  first time
+# the script is run. These were the values on that first run.
+# In future it would be nice to adapt the backup-vm-cairo script to 
+# automatically expand the backup volumes if instructed to here.
+# For now this must be done manually when necessary.
+
+/etc/backup/backup-vm-cairo-daily home 16G 592M &> /var/log/backup-vm-cairo-daily-home.log
+/etc/backup/backup-vm-cairo-daily root 2G 256M &> /var/log/backup-vm-cairo-daily-root.log
+/etc/backup/backup-vm-cairo-daily site 32M 16M &> /var/log/backup-vm-cairo-daily-site.log
+/etc/backup/backup-vm-cairo-daily usr 4G 592M &> /var/log/backup-vm-cairo-daily-usr.log
+/etc/backup/backup-vm-cairo-daily var 8G 592M &> /var/log/backup-vm-cairo-daily-var.log

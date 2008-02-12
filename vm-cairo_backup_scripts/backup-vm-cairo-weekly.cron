@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Perform weekly backup rotation for system volume backups
+
+/etc/backup/backup-vm-cairo-weekly home
+/etc/backup/backup-vm-cairo-weekly root
+/etc/backup/backup-vm-cairo-weekly site
+/etc/backup/backup-vm-cairo-weekly usr
+/etc/backup/backup-vm-cairo-weekly var

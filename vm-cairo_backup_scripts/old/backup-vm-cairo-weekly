@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# This script rotates the oldest daily backups
+# to weekly backups.
+
+BACKUP_VOLUME="home"
+BACKUP_DEVICE="/dev/backup/${BACKUP_VOLUME}"
+BACKUP_RW_MOUNT="/mnt/backup/${BACKUP_VOLUME}_rw"
+BACKUP_RO_MOUNT="/mnt/backup/${BACKUP_VOLUME}"
+
+### Create the backup RW mount-point
+#
+if [ ! -d $BACKUP_RW_MOUNT ] ; then
+mkdir $BACKUP_RW_MOUNT
+chmod go-rwx $BACKUP_RW_MOUNT
+fi
+
+# Attempt to mount the RW mount point; else abort
+#
+mount -o rw ${BACKUP_DEVICE} ${BACKUP_RW_MOUNT}
+if (( $? )); then
+{
+	$ECHO "Could not mount $BACKUP_DEVICE read-write";
+	exit;
+}
+fi
+
+### Make backup of current (snapshot) volume
+#
+# This method creates hard-links to the previous backup for unchanged
+# files, saving considerable space.
+#
+rsync -a --delete --link-dest=${BACKUP_RW_MOUNT}/daily.1 \
+${SNAPSHOT_MOUNT}/ ${BACKUP_RW_MOUNT}/daily.0/
+
+### Update the mtime of daily.0 to reflect the snapshot time
+#
+touch ${BACKUP_RW_MOUNT}/daily.0 ;
+
+### Attempt to unmount the RW mount point
+#
+umount ${BACKUP_RW_MOUNT}
+rmdir ${BACKUP_RW_MOUNT}
+
+### Attempt to create the RO mount point
+#
+# This will only usually be necessary on the first run of this script.
+#
+if [ ! -d ${BACKUP_RO_MOUNT} ] ; then
+mkdir ${BACKUP_RO_MOUNT}
+fi
+
+### Attempt to mount the RO mount point
+#
+mount -o ro ${BACKUP_DEVICE} ${BACKUP_RO_MOUNT}
+
+### Unmount the snapshot
+#
+umount ${SNAPSHOT_MOUNT}
+rmdir ${SNAPSHOT_MOUNT}
+
+### Remove the snapshot volume
+#
+lvremove -f ${SNAPSHOT_DEVICE}

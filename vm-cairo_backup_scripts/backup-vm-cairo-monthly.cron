@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Perform monthly backup rotation for system volume backups
+
+/etc/backup/backup-vm-cairo-monthly home
+/etc/backup/backup-vm-cairo-monthly root
+/etc/backup/backup-vm-cairo-monthly site
+/etc/backup/backup-vm-cairo-monthly usr
+/etc/backup/backup-vm-cairo-monthly var
