@@ -264,10 +264,10 @@ def ks_test(x, y):
     ny = len(y)
     jx = jy = 0
     fnx = fny = 0.0
-    fnx_arr = N.zeros(nx, N.float32)
-    fny_arr = N.zeros(ny, N.float32)
-    binx = N.zeros(nx, N.float32)
-    biny = N.zeros(ny, N.float32)
+    fnx_arr = N.zeros(nx+1, N.float32)
+    fny_arr = N.zeros(ny+1, N.float32)
+    binx = N.zeros(nx+1, N.float32)
+    biny = N.zeros(ny+1, N.float32)
     d = 0.0
     while (jx < nx or jy < ny):
         if jx < nx:
@@ -280,13 +280,13 @@ def ks_test(x, y):
             dy = y[-1]
         if (dx <= dy or jy >= ny-1) and jx < nx:
             fnx = (jx+1)/float(nx)
-            binx[jx] = dx
-            fnx_arr[jx] = fnx
+            binx[jx+1] = dx
+            fnx_arr[jx+1] = fnx
             jx += 1
         if (dy <= dx or jx >= nx-1) and jy < ny:
             fny = (jy+1)/float(ny)
-            biny[jy] = dy
-            fny_arr[jy] = fny
+            biny[jy+1] = dy
+            fny_arr[jy+1] = fny
             jy += 1
         dt = abs(fny-fnx)
         if dt > d:
@@ -294,6 +294,8 @@ def ks_test(x, y):
         #print '%5.3f  %5.3f  %5.3f  %5.3f  %5.3f  %5.3f'%(dx, dy, fnx, fny, dt, d)
     n = sqrt(nx*ny/float(nx+ny))
     prob = probks((n+0.12+0.11/n)*d)
+    binx[0] = binx[1] - (binx[-1] - binx[1])
+    biny[0] = biny[1] - (biny[-1] - biny[1])
     return d, prob, [binx, fnx_arr], [biny, fny_arr]
 
 
@@ -322,10 +324,10 @@ def kuiper_test(x, y):
     ny = len(y)
     jx = jy = 0
     fnx = fny = 0.0
-    fnx_arr = N.zeros(nx, N.float32)
-    fny_arr = N.zeros(ny, N.float32)
-    binx = N.zeros(nx, N.float32)
-    biny = N.zeros(ny, N.float32)
+    fnx_arr = N.zeros(nx+1, N.float32)
+    fny_arr = N.zeros(ny+1, N.float32)
+    binx = N.zeros(nx+1, N.float32)
+    biny = N.zeros(ny+1, N.float32)
     d1 = d2 = 0.0
     while (jx < nx or jy < ny):
         if jx < nx:
@@ -338,22 +340,23 @@ def kuiper_test(x, y):
             dy = y[-1]
         if (dx <= dy or jy >= ny-1) and jx < nx:
             fnx = (jx+1)/float(nx)
-            binx[jx] = dx
-            fnx_arr[jx] = fnx
+            binx[jx+1] = dx
+            fnx_arr[jx+1] = fnx
             jx += 1
         if (dy <= dx or jx >= nx-1) and jy < ny:
             fny = (jy+1)/float(ny)
-            biny[jy] = dy
-            fny_arr[jy] = fny
+            biny[jy+1] = dy
+            fny_arr[jy+1] = fny
             jy += 1
         dt1 = (fny-fnx)
         dt2 = (fnx-fny)
 	d1 = max(d1, dt1)
 	d2 = max(d2, dt2)
-    print d1, d2
     v = d1 + d2
     n = sqrt(nx*ny/float(nx+ny))
     prob = probkuiper((n+0.155+0.24/n)*v)
+    binx[0] = binx[1] - (binx[-1] - binx[1])
+    biny[0] = biny[1] - (biny[-1] - biny[1])
     return v, prob, [binx, fnx_arr], [biny, fny_arr]
 
 

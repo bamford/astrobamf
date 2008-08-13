@@ -64,10 +64,13 @@ def calc_ang_diff(a1, a2):
     return delta
 
 
-def calc_ang_dist(ra1, dec1, ra2, dec2, units='degrees'):
+def calc_ang_dist(ra1, dec1, ra2, dec2, units='degrees',
+                  safe=True):
     DPIBY2 = 0.5 * pi
-
-    ra1, dec1, ra2, dec2 = [checkarray(i) for i in (ra1, dec1, ra2, dec2)]
+    
+    if safe:
+        ra1, dec1, ra2, dec2 = [checkarray(i, double=True)
+                                for i in (ra1, dec1, ra2, dec2)]
     
     if units == "hrdeg":
         convRA = pi / 12.0
@@ -150,9 +153,86 @@ def Tfunction(p, x):
     p0, p1, q0, q1, q2 = p
     return p0 + p1*x + q0*N.tanh((x-q1)/q2)
 
+def Tfunction04(p, x):
+    p0, p1, q0, q1, q2 = p
+    return p0 + p1*(x+20) + q0*N.tanh((x-q1)/q2)
+
+
+def lumfn_blue_baldry04(Mr):
+    # Schechter parameters for blue sequence
+    #-20.90  0.00254  -0.25  0.00157  -1.54
+    #  0.08  0.00032   0.23  0.00043   0.08
+    pass
+
+def lumfn_red_baldry04(Mr):
+    # Schechter parameters for red sequence
+    #-21.34  0.00304  -0.69  0.00000  -1.00
+    #0.02  0.00008   0.02 -9.99999  -9.99
+    pass
+
 def Cur_divide_baldry06(Mstar):
     p = (2.18, 0, 0.38, 10.26, 0.85)
     return Tfunction(p, Mstar)
+
+def Cur_divide_baldry04(Mr):
+    # updated to DR4
+    # http://www.astro.ljmu.ac.uk/~ikb/research/bimodality-paperI.html
+    p = (2.192, 0, -0.354, -20.58, 2.05)
+    return Tfunction(p, Mr)
+
+def Cur_red_baldry04(Mr):
+    # updated to DR4
+    # http://www.astro.ljmu.ac.uk/~ikb/research/bimodality-paperI.html
+    p = (2.386, -0.079, -0.076, -19.75, 1.04)
+    # old, from paper
+    #p = (2.279, -0.037, -0.108, -19.81, 0.96)
+    return Tfunction04(p, Mr)
+
+def Cur_red_baldry04_Mstar(Mstar):
+    Cur = Cur_divide_baldry06(Mstar)
+    deltaCur = 1.0
+    oldCur = Cur 
+    while deltaCur > 0.001:
+        Mr = Mr_from_logMstar_baldry06(Mstar, Cur)
+        Cur = Cur_red_baldry04(Mr)
+        deltaCur = (N.absolute(Cur - oldCur)).max()
+        oldCur = Cur
+    return Mr, Cur
+
+def Cur_blue_baldry04_Mstar(Mstar):
+    Cur = Cur_divide_baldry06(Mstar)
+    deltaCur = 1.0
+    oldCur = Cur 
+    while deltaCur > 0.001:
+        Mr = Mr_from_logMstar_baldry06(Mstar, Cur)
+        Cur = Cur_blue_baldry04(Mr)
+        deltaCur = (N.absolute(Cur - oldCur)).max()
+        oldCur = Cur
+    return Mr, Cur
+
+def Cur_sigma_red_baldry04(Mr):
+    # updated to DR4
+    # http://www.astro.ljmu.ac.uk/~ikb/research/bimodality-paperI.html
+    p = (0.140, 0.000, 0.049, -21.23, 1.13)
+    # old, from paper
+    #p = (0.152, 0.008, 0.044, -19.91, 0.94)
+    return Tfunction04(p, Mr)
+
+def Cur_blue_baldry04(Mr):
+    # updated to DR4
+    # http://www.astro.ljmu.ac.uk/~ikb/research/bimodality-paperI.html
+    p = (1.866, -0.062, -0.361, -21.29, 1.54)
+    # old, from paper
+    #p = (1.790, -0.053, -0.363, -20.75, 1.12)
+    return Tfunction04(p, Mr)
+
+def Cur_sigma_blue_baldry04(Mr):
+    # updated to DR4
+    # http://www.astro.ljmu.ac.uk/~ikb/research/bimodality-paperI.html
+    p = (0.276, 0.000, -0.038, -19.88, 0.43)
+    # old, from paper
+    #p = (0.298, 0.014, -0.067, -19.90, 0.58)
+    return Tfunction04(p, Mr)
 
 def check_Cur_divide_baldry06():
     pgaqt()
@@ -185,3 +265,9 @@ def logMstar_baldry06(Mr, Cur):
     logML = logML_baldry06(Cur)
     logM = (Mr_solar - Mr)/2.5 + logML
     return logM
+
+def Mr_from_logMstar_baldry06(Mstar, Cur):
+    Mr_solar = 4.62
+    logML = logML_baldry06(Cur)
+    Mr = Mr_solar - 2.5*(Mstar - logML)
+    return Mr

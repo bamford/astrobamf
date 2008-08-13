@@ -1,7 +1,7 @@
 # cosmology.py
 # (formerly distance_modulus.py)
 
-from math import log10, log, sqrt, pi, sin, cos, exp
+from math import log, sqrt, pi, sin, cos, exp
 from nr import erffc
 from ppgplot_spb import *
 import scipy.integrate
@@ -39,7 +39,7 @@ G_N = 6.673e-11  # m**3 kg**(-1) s**(-2)
 # omega_matter + omega_lambda = 1
 def dmod_flat(z, H0=H0_std, omega_m0=omega_m0_std):
     dL = dL_flat(z, H0, omega_m0)
-    mu = 5.0 * log10(dL*1.E6) - 5.0
+    mu = 5.0 * N.log10(dL*1.E6) - 5.0
     return mu
 
 # Luminosity distance for a flat universe with
@@ -63,11 +63,11 @@ def dA_flat(z, H0=H0_std, omega_m0=omega_m0_std):
     return dA
 
 # Angular scale distance for a flat universe
-# kpc/arcsec
 arcsec_in_rad = 180*60*60/pi
 kpc_in_Mpc = 10**3
 ang_scale_conversion = kpc_in_Mpc / arcsec_in_rad
 def ang_scale_flat(z, H0=H0_std, omega_m0=omega_m0_std):
+    # kpc/arcsec
     dA = dA_flat(z, H0, omega_m0)
     ang_scale = dA * ang_scale_conversion
     return ang_scale
@@ -76,7 +76,7 @@ def ang_scale_flat(z, H0=H0_std, omega_m0=omega_m0_std):
 # omega_lambda = 0
 def dmod_classical(z, H0=H0_classical, q0=q0_classical):
     dL = dL_classical(z, H0, q0)
-    mu = 5.0 * log10(dL*1.E6) - 5.0
+    mu = 5.0 * N.log10(dL*1.E6) - 5.0
     return mu
 
 # Luminosity distance for a classical universe with
@@ -209,12 +209,102 @@ def vol_ratio(z1, z2, H0=H0_std,
 # All-sky, in cubic Mpc
 def vol(zmin, zmax, H0=H0_std,
         omega_m0=omega_m0_std, omega_lambda0=omega_lambda0_std):
-    # function to integrate
-    def intfn(z):
-	return (4*pi * dA_flat(z, H0, omega_m0)**2 * (1+z)**2 * c0 / 
-                H(z, H0, omega_m0, omega_lambda0))
-    v, verr = scipy.integrate.quad(intfn, zmin, zmax)
+    zmax = checkarray(zmax)
+    v = N.zeros(zmax.shape)
+    for i, zmaxi in enumerate(zmax):
+        # function to integrate
+        def intfn(z):
+            return (4*pi * dA_flat(z, H0, omega_m0)**2 * (1+z)**2 * c0 / 
+                    H(z, H0, omega_m0, omega_lambda0))
+        vi, vierr = scipy.integrate.quad(intfn, zmin, zmaxi)
+        v[i] = vi
+    if len(v) == 1:
+	v = v[0]
     return v
+
+# calculate the maximum redshift at which an object with absolute
+# magnitude mabs could be included in a survey limited to apparent
+# magnitude mapplim.  Optimised to do many objects in one go.
+def zmax(mabs, mapplim, zlow, zhigh, nz=None):
+    mabs = checkarray(mabs)
+    if nz is None:
+        deltaz = 0.001
+        nz = int((zhigh-zlow)/deltaz)
+    deltaz = (zhigh-zlow)/float(nz)
+    zlist = N.arange(zhigh+deltaz/10, zlow, -deltaz)
+    dmodlist = dmod_flat(zlist)
+    mabslist = mapplim - dmodlist
+    i = N.searchsorted(mabslist, mabs)
+    ihigh = i == nz+1
+    N.putmask(i, ihigh, nz)
+    ilow = i == 0
+    N.putmask(i, ilow, 1)
+    z1 = zlist[i-1]
+    z2 = zlist[i]
+    m1 = mabslist[i-1]
+    m2 = mabslist[i]
+    s = (z2-z1)/(m2-m1)
+    zmax = z1 + s*(mabs-m1)
+    N.putmask(zmax, ilow, zhigh)
+    N.putmask(zmax, ihigh, zlow)
+    if len(zmax.shape) == 1:
+       zmax = zmax[0]
+    return zmax
+
+# calculate the maximum redshift at which an object with absolute
+# size rkpc could be included in a survey limited to apparent
+# size raslim.  Optimised to do many objects in one go.
+def zmax_size(rkpc, raslim, zlow, zhigh, nz):
+    rkpc = checkarray(rkpc)
+    deltaz = (zhigh-zlow)/float(nz)
+    zlist = N.arange(zlow, zhigh+deltaz/10, deltaz)
+    angscalelist = ang_scale_flat(zlist)
+    rkpclist = raslim * angscalelist
+    i = N.searchsorted(rkpclist, rkpc)
+    ihigh = i == nz+1
+    N.putmask(i, ihigh, nz)
+    ilow = i == 0
+    N.putmask(i, ilow, 1)
+    z1 = zlist[i-1]
+    z2 = zlist[i]
+    r1 = rkpclist[i-1]
+    r2 = rkpclist[i]
+    s = (z2-z1)/(r2-r1)
+    zmax = z1 + s*(rkpc-r1)
+    N.putmask(zmax, ilow, zlow)
+    N.putmask(zmax, ihigh, zhigh)
+    if len(zmax.shape) == 1:
+       zmax = zmax[0]
+    return zmax
+
+# calculate the maximum redshift at which an object with absolute
+# surface brightness sbabs (could be included in a survey limited to
+# apparent surface brightness sbapplim.
+# Optimised to do many objects in one go.
+def zmax_sb(sbabs, sbapplim, zlow, zhigh, nz):
+    sbabs = checkarray(sbabs)
+    deltaz = (zhigh-zlow)/float(nz)
+    zlist = N.arange(zhigh+deltaz/10, zlow, -deltaz)
+    dmodlist = dmod_flat(zlist)
+    angscalelist = ang_scale_flat(zlist)
+    sbabslist = sbapplim - dmodlist + 2.5*N.log10(angscalelist**2)
+    i = N.searchsorted(sbabslist, sbabs)
+    ihigh = i == nz+1
+    N.putmask(i, ihigh, nz)
+    ilow = i == 0
+    N.putmask(i, ilow, 1)
+    z1 = zlist[i-1]
+    z2 = zlist[i]
+    sb1 = sbabslist[i-1]
+    sb2 = sbabslist[i]
+    s = (z2-z1)/(sb2-sb1)
+    zmax = z1 + s*(sbabs-sb1)
+    N.putmask(zmax, ilow, zhigh)
+    N.putmask(zmax, ihigh, zlow)
+    if len(zmax.shape) == 1:
+       zmax = zmax[0]
+    return zmax
+
 
 #----------------------------------------------------------------------
 # Calculate some cosmological structure formation information

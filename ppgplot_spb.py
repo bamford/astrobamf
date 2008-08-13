@@ -12,6 +12,7 @@ from gaussian import gaussian2d
 import sys
 #import nr as nr
 import rostat as rostat
+from scipy.stats import median, scoreatpercentile
 
 pgplot_extras_path = '/Users/spb/Work/software/pgplot_extras'
 
@@ -30,6 +31,11 @@ def pgxpt(x, y, s):
 	pgsch(0.75*ch)
 	pgpt(x, y, pointStyles[s.replace('small', '')])
 	pgsch(ch)
+    elif s.startswith('tiny'):
+	ch = pgqch()
+	pgsch(0.5*ch)
+	pgpt(x, y, pointStyles[s.replace('tiny', '')])
+	pgsch(ch)
     else:
         pgpt(x, y, pointStyles[s])
 
@@ -40,7 +46,7 @@ def pgxsls(s):  pgsls(lineStyles[s])
 def pgxsci(s):  pgsci(colourIndices[s])
 
 # OLD COLOUR SETUP ---------------------------------------------------
-# PGPLOT colour indices
+# # PGPLOT colour indices
 # colourIndices = {"white": 0, "black": 1, "red": 2, "green": 3, "blue":4,
 # 		 "brightcyan": 5, "magenta": 6, "yellow": 7, "orange": 8,
 # 		 "lime": 9, "seafoam": 10, "cyan": 11, "purple": 12,
@@ -49,8 +55,7 @@ def pgxsci(s):  pgsci(colourIndices[s])
 # 		 "darkred":16, "darkgreen":17, "darkblue":18,
 # 		 "lightcyan":19,
 # 		 "mocha": 20}
-#colourIndices = {"black": 1, "red": 1, "green": 1, "blue":1, "magenta": 1, "cyan": 1, "purple": 1,
-#                 "darkgray":14,"lightgray":15}
+# #colourIndices = {"black": 1, "red": 1, "green": 1, "blue":1, "magenta": 1, "cyan": 1, "purple": 1, "darkgray":14,"lightgray":15}
 # def pg_more_colours():
 #     pgscr(16, 0.75, 0.0, 0.0)
 #     pgscr(17, 0.0, 0.6, 0.0)
@@ -94,7 +99,7 @@ def pgsetup(nx=1, ny=1):
     anx = abs(nx)
     any = abs(ny)
     if anx > 1 or any > 1:
-	pgpap(5.0*anx, float(any)/anx)
+	pgpap(anx*5.0, float(any)/anx)
 	pgsubp(nx, ny)
     else:
 	pgpap(0, 1.0)
@@ -104,6 +109,28 @@ def pgsetup(nx=1, ny=1):
 
 def pgaqt():
     pgopen('/aqt')
+
+def trend_bins(x, y, xlow=None, xhigh=None, xbinwidth=None, nmin=100,
+               lowpc=2.5, highpc=97.5):
+    if xlow is None:  xlow = scoreatpercentile(x, 1)
+    if xhigh is None:  xhigh = scoreatpercentile(x, 99)
+    if xbinwidth is None:  xbinwidth = (xhigh - xlow) * 100*nmin / len(x)
+    x_bin = N.arange(xlow, xhigh, xbinwidth)
+    n_bin = len(x_bin)
+    y_bin = N.zeros((3, n_bin), N.float) - 99999
+    ok = N.ones(n_bin, N.bool)
+    for i, xb in enumerate(x_bin):
+        inbin = (x >= xb - 0.5*xbinwidth) & (x < xb + 0.5*xbinwidth)
+        y_inbin = y[inbin]
+        if len(y_inbin) > 100:
+            y_bin[0, i] = median(y_inbin)
+            y_bin[1, i] = scoreatpercentile(y_inbin, lowpc)
+            y_bin[2, i] = scoreatpercentile(y_inbin, highpc)
+        else:
+            ok[i] = False
+    x_bin = x_bin[ok]
+    y_bin = y_bin[:,ok]
+    return x_bin, y_bin
 
 def bin_array(d, nbin, low, high):
     n = len(d)
@@ -138,6 +165,38 @@ def bin_array_2d(x, y, nxbin, xlow, xhigh, nybin, ylow, yhigh,
 	if 0 <= jbin_index < nxbin and 0 <= ibin_index < nybin:
 	    d_bin[ibin_index, jbin_index] += 1.0/c
     return x_bin, y_bin, d_bin
+
+
+def min_array_2d(x, y, z, nxbin, xlow, xhigh, nybin, ylow, yhigh,
+                 listoutput=False):
+    nx = len(x)
+    ny = len(y)
+    if nx != ny:
+	print 'Error: len(x) != len(y)'
+	return
+    xstep = float(xhigh-xlow)/nxbin
+    ystep = float(yhigh-ylow)/nybin
+    x_bin = N.arange(nxbin) * xstep + xlow + xstep/2.0
+    y_bin = N.arange(nybin) * ystep + ylow + ystep/2.0
+    d_bin = N.zeros((nybin, nxbin), N.float) + 1e100
+    if listoutput:
+        xl = N.zeros(nxbin*nybin, N.float)
+        yl = N.zeros(nxbin*nybin, N.float)
+        dl = N.zeros(nxbin*nybin, N.float)
+    for k in range(nx):
+	jbin_index = int((x[k] - xlow)/xstep)
+	ibin_index = int((y[k] - ylow)/ystep)
+	if (0 <= jbin_index < nxbin and 0 <= ibin_index < nybin
+            and d_bin[ibin_index, jbin_index] > z[k]):
+	    d_bin[ibin_index, jbin_index] = z[k]
+            if listoutput:
+                xl[jbin_index*nxbin+ibin_index] = (jbin_index+0.5)*xstep+xlow
+                yl[jbin_index*nxbin+ibin_index] = (ibin_index+0.5)*ystep+ylow
+                dl[jbin_index*nxbin+ibin_index] = z[k]
+    if listoutput:
+        return xl, yl, dl
+    else:
+        return x_bin, y_bin, d_bin
 
 
 def bin_array_2d_smooth(x, y, nxbin, xlow, xhigh, nybin, ylow, yhigh,
@@ -339,8 +398,12 @@ def ps2gif(f):
 	      '%s %s &'%(f, f.replace('.ps', '.gif')))
 
 
-def checkarray(x):
-    xa = N.asarray(x)
+def checkarray(x, double=False):
+    if double:
+        t = N.float64
+    else:
+        t = N.float32
+    xa = N.asarray(x, t)
     if len(xa.shape) < 1:
-        xa = N.asarray([x])
+        xa = N.asarray([x], t)
     return xa
