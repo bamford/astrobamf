@@ -7,7 +7,8 @@
 
 from math import *
 import numpy as N
-from ppgplot_spb import *
+#from ppgplot_spb import *
+from checkarray import checkarray
 from cosmology import *
 
 # convert strings of RA (hh:mm:ss.s) and Dec (dd:mm:ss.s) in to

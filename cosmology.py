@@ -3,7 +3,8 @@
 
 from math import log, sqrt, pi, sin, cos, exp
 from nr import erffc
-from ppgplot_spb import *
+#from ppgplot_spb import *
+from checkarray import checkarray
 import scipy.integrate
 import numpy as N
 

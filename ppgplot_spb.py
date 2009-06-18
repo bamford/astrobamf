@@ -430,14 +430,3 @@ def ps2gif(f):
     f = f.replace('/ps', '')
     os.system('convert -density 576 -geometry 25% -rotate 90 ' +
 	      '%s %s &'%(f, f.replace('.ps', '.gif')))
-
-
-def checkarray(x, double=False):
-    if double:
-        t = N.float64
-    else:
-        t = N.float32
-    xa = N.asarray(x, t)
-    if len(xa.shape) < 1:
-        xa = N.asarray([x], t)
-    return xa
