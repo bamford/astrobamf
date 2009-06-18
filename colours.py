@@ -25,7 +25,7 @@ main_colours = {
 
 
 dark_colours = {}
-dark_adjust = 0.5
+dark_adjust = 0.666
 for c in main_colours:
     rgb = main_colours[c]
     drgb = tuple([i*dark_adjust for i in rgb])
@@ -40,8 +40,17 @@ for c in main_colours:
     name = "light-"+c
     light_colours["light-"+c] = lrgb
 
+very_light_colours = {}
+very_light_adjust = 0.25
+for c in main_colours:
+    rgb = main_colours[c]
+    lrgb = tuple([1.0 - (1.0 - i)*very_light_adjust for i in rgb])
+    name = "verylight-"+c
+    very_light_colours["verylight-"+c] = lrgb
+
 colours = {}
-for cdict in (greys, main_colours, dark_colours, light_colours):
+for cdict in (greys, main_colours, dark_colours,
+              light_colours, very_light_colours):
     for c in cdict:
         colours[c] = cdict[c]
 

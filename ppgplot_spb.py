@@ -26,6 +26,10 @@ pointStyles = {"dot": 17, "point": 1, "square": 0, "plus": 2, "asterisk": 3,
 def pgxpt(x, y, s):
     x = N.asarray(x)
     y = N.asarray(y)
+    ch1 = None
+    if s.endswith('filled-square'):
+        ch1 = pgqch()
+	pgsch(1.25*ch1)
     if s.startswith('small'):
 	ch = pgqch()
 	pgsch(0.75*ch)
@@ -38,6 +42,9 @@ def pgxpt(x, y, s):
 	pgsch(ch)
     else:
         pgpt(x, y, pointStyles[s])
+    if not ch1 is None:
+        pgsch(ch1)
+
 
 # PGPLOT linestyles
 lineStyles = {"solid": 1, "dashed": 2, "dash-dot": 3, "dotted": 4}
@@ -122,7 +129,7 @@ def trend_bins(x, y, xlow=None, xhigh=None, xbinwidth=None, nmin=100,
     for i, xb in enumerate(x_bin):
         inbin = (x >= xb - 0.5*xbinwidth) & (x < xb + 0.5*xbinwidth)
         y_inbin = y[inbin]
-        if len(y_inbin) > 100:
+        if len(y_inbin) > nmin:
             y_bin[0, i] = median(y_inbin)
             y_bin[1, i] = scoreatpercentile(y_inbin, lowpc)
             y_bin[2, i] = scoreatpercentile(y_inbin, highpc)
@@ -165,6 +172,33 @@ def bin_array_2d(x, y, nxbin, xlow, xhigh, nybin, ylow, yhigh,
 	if 0 <= jbin_index < nxbin and 0 <= ibin_index < nybin:
 	    d_bin[ibin_index, jbin_index] += 1.0/c
     return x_bin, y_bin, d_bin
+
+def ave_array_2d(x, y, z, nxbin, xlow, xhigh, nybin, ylow, yhigh,
+		 completeness=None):
+    nx = len(x)
+    ny = len(y)
+    if nx != ny:
+	print 'Error: len(x) != len(y)'
+	return
+    xstep = float(xhigh-xlow)/nxbin
+    ystep = float(yhigh-ylow)/nybin
+    x_bin = N.arange(nxbin) * xstep + xlow + xstep/2.0
+    y_bin = N.arange(nybin) * ystep + ylow + ystep/2.0
+    d_bin = N.zeros((nybin, nxbin), N.float)
+    z_bin = N.zeros((nybin, nxbin), N.float)
+    for k in range(nx):
+	jbin_index = int((x[k] - xlow)/xstep)
+	ibin_index = int((y[k] - ylow)/ystep)
+	if completeness is None:
+	    c = 1
+	else:
+	    c = completeness[k]
+	if 0 <= jbin_index < nxbin and 0 <= ibin_index < nybin:
+	    d_bin[ibin_index, jbin_index] += 1.0/c
+            z_bin[ibin_index, jbin_index] += z[k]
+    z_bin /= d_bin
+    N.putmask(z_bin, d_bin < 1, 0.0)
+    return x_bin, y_bin, z_bin
 
 
 def min_array_2d(x, y, z, nxbin, xlow, xhigh, nybin, ylow, yhigh,

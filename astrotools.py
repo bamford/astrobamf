@@ -23,7 +23,12 @@ def radec_to_deg(ra, dec):
     return ra_deg, dec_deg
 
 
-def rahms_decdms_to_deg(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s):
+def rahms_decdms_to_deg(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, safe=True):
+    if safe:
+        ra_h, ra_m, ra_s = [checkarray(i, double=True)
+                            for i in (ra_h, ra_m, ra_s)]
+        dec_d, dec_m, dec_s = [checkarray(i, double=True)
+                               for i in (dec_d, dec_m, dec_s)]
     ra_sign = (ra_h+0.5) / abs(ra_h+0.5)
     ra_h = N.absolute(ra_h)
     ra_hours = ra_sign * (ra_h + ra_m / 60.0 + ra_s / 3600.0)
@@ -31,15 +36,30 @@ def rahms_decdms_to_deg(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s):
     dec_sign = (dec_d+0.5) / abs(dec_d+0.5)
     dec_d = N.absolute(dec_d)
     dec_deg = dec_sign * (dec_d + dec_m / 60.0 + dec_s / 3600.0)
-    # put onto range 0-360 deg
-    if ra_deg >= 0.0:
-        while ra_deg >= 360.0:  ra_deg = ra_deg - 360.0
-    else:
-        while ra_deg <= -360.0:  ra_deg = ra_deg + 360.0
-    if dec_deg >= 0.0:
-        while dec_deg >= 360.0:  dec_deg = dec_deg - 360.0
-    else:
-        while dec_deg <= -360.0:  dec_deg = dec_deg + 360.0
+    # put onto ranges RA: 0..360 deg, Dec: -90..90
+    while (dec_deg >= 360.0).any():
+        dec_deg[decdeg >= 360.0] -= 360.0
+    while (dec_deg < 0.0).any():
+        dec_deg[decdeg < 0.0] += 360.0
+    select = (dec_deg < 270.0)&(dec_deg > 90.0)
+    ra_deg[select] += 180.0
+    dec_deg[select] *= -1
+    dec_deg[select] += 180
+    select = (dec_deg > -270.0)&(dec_deg < -90.0)
+    ra_deg[select] += 180.0
+    dec_deg[select] *= -1
+    dec_deg[select] -= 180
+    select = (dec_deg >= 270.0)
+    dec_deg[select] -= 360
+    select = (dec_deg <= -270.0)
+    dec_deg[select] += 360
+    while (ra_deg >= 360.0).any():
+        ra_deg[radeg >= 360.0] -= 360.0
+    while (ra_deg < 0.0).any():
+        ra_deg[radeg < 0.0] += 360.0
+    if len(ra_deg) == 1:
+        ra_deg = ra_deg[0]
+        dec_deg = dec_deg[0]
     return ra_deg, dec_deg
 
 
@@ -117,13 +137,44 @@ def angles_to_xyz(r,phi,theta):
 #  arguments (in degrees):  RA, 90-DEC
 #  From IDLUTILS.
  
-   DRADEG = 180.0/pi
-   stheta = N.sin(theta / DRADEG)
-   x = r * N.cos(phi / DRADEG) * stheta
-   y = r * N.sin(phi / DRADEG) * stheta
-   z = r * N.cos(theta / DRADEG)
+   dradeg = 180.0/pi
+   stheta = N.sin(theta / dradeg)
+   x = r * N.cos(phi / dradeg) * stheta
+   y = r * N.sin(phi / dradeg) * stheta
+   z = r * N.cos(theta / dradeg)
  
    return x, y, z
+
+def radec_to_xy(ra, dec, racentre=None, deccentre=None, rotate=None):
+    dradeg = 180.0/pi
+    cdelt = N.ones(2, N.float)/60.0
+    if racentre is None:
+        racentre = N.mean(ra)
+    if deccentre is None:
+        deccentre = N.mean(dec)
+    racentre /= dradeg
+    deccentre /= dradeg
+    radif = ra/dradeg - racentre
+    dec = dec / dradeg
+    h = N.sin(dec)*N.sin(deccentre) + N.cos(dec)*N.cos(deccentre)*N.cos(radif)
+    xsi = N.cos(dec)*N.sin(radif)/h
+    eta = (N.sin(dec)*N.cos(deccentre) - N.cos(dec)*N.sin(deccentre)*N.cos(radif))/h
+    xsi = xsi*dradeg
+    eta = eta*dradeg
+    xsi = xsi/cdelt[0]
+    eta = eta/cdelt[1]
+
+    if rotate is not None:
+        rotate /= dradeg
+        cd = N.array([[N.cos(rotate), -N.sin(rotate)],
+                      [N.sin(rotate), N.cos(rotate)]])
+        x = cd[0,0]*xsi + cd[0,1]*eta
+        y = cd[1,0]*xsi + cd[1,1]*eta
+    else:
+        x = xsi
+        y = eta
+    
+    return x, y
 
 def distance(x1, y1, z1, x2, y2, z2):
     return N.sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)

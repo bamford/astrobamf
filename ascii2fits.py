@@ -1,6 +1,7 @@
 import numpy as N
 import pyfits
 import os
+import string
 
 def ascii2fits(infilename, outfilename, sep=None, header=None):
     f = file(infilename)
@@ -15,12 +16,31 @@ def ascii2fits(infilename, outfilename, sep=None, header=None):
         columns = [i.strip() for i in ls]
         h.close()
     lines = f.readlines()
-    lines = [i.split(sep) for i in lines]
+    lines = [i.split(sep) for i in lines
+             if ((len(i.strip()) > 0) & (i.strip[0]!='#'))]
+    ncol = len(columns)
     data = {}
     cols = []
     for i, c in enumerate(columns):
         example = lines[0][i]
-        if '.' in example:
+        punc = ['!', '"', '#', '$', '%', '&', "'",
+                '(', ')', '*', ',', '/', ':', ';', '<', '=', '>', '?',
+                '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~']
+        istext = False
+        for l in list(string.letters) + punc:
+            if l in example:
+                istext = True
+                break
+        if not istext:
+            for l in ['-', '+']:
+                if l in example[1:]:
+                    istext = True
+                    break
+        if istext:
+            t = str
+            tn = N.str
+            tp = '%iA'%(2*len(example))
+        elif '.' in example:
             t = float
             tn = N.float
             tp = 'E'
@@ -36,7 +56,7 @@ def ascii2fits(infilename, outfilename, sep=None, header=None):
             t = long
             tn = N.int64
             tp = 'K'
-        d = [t(l[i]) for l in lines]
+        d = [t(l[i]) for l in lines if len(l)==ncol]
         data[c] = N.array(d, tn)
         cols.append(pyfits.Column(name=c, format=tp, array=data[c]))
     tbhdu=pyfits.new_table(cols)
