@@ -13,6 +13,7 @@ import sys
 #import nr as nr
 import rostat as rostat
 from scipy.stats import median, scoreatpercentile
+from checkarray import checkarray
 
 pgplot_extras_path = '/Users/spb/Work/software/pgplot_extras'
 

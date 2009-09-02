@@ -42,3 +42,43 @@ def combine_fits_tables(tables, outfile, idfield='OBJID'):
     if file_exists:
         os.remove(outfile)
     tbhdu.writeto(outfile)
+
+def concatenate_fits_tables(tables, outfile):
+    tmaster = tables[0]
+    nhdu = len(tmaster)
+    hdus = [pyfits.PrimaryHDU()]
+    for t in tables[1:]:
+        nhdut = len(t)
+        if nhdu != nhdut:
+            raise ValueError('files do not all have same number of hdus')
+    for i in range(nhdu):
+        nrows1 = len(tmaster[i].data)
+        nrows = nrows1
+        ncols1 = len(tmaster[i].columns.names)
+        print 'ncols1:', ncols1
+        names = tmaster[i].columns.names
+        for t in tables[1:]:
+            nrowst = len(t[i].data)
+            ncolst = len(t[i].columns.names)
+            print 'ncolst:', ncolst
+            namest = t[i].columns.names
+            newnames = []
+            for n in names:
+                if n in namest:
+                    newnames.append(n)
+            names = newnames
+            #if ncols1 != ncolst:
+            #    raise ValueError('tables do not all have same number of columns')
+            nrows += nrowst
+        hdu = pyfits.new_table(tmaster[i].columns, nrows=nrows)
+        print names
+        startrow = nrows1
+        for t in tables[1:]:
+            nrowst = len(t[i].data)
+            for name in names:
+                hdu.data.field(name)[startrow:startrow+nrowst]=t[i].data.field(name) 
+            startrow += nrowst
+        hdus.append(hdu)
+    hdulist = pyfits.HDUList(hdus)
+    hdulist.info()
+    hdulist.writeto(outfile)
