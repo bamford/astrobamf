@@ -24,6 +24,42 @@ def radec_to_deg(ra, dec):
     return ra_deg, dec_deg
 
 
+def radec_deg_to_hms_dms(ra_deg, dec_deg, sec_precision=3, safe=True,
+                         asstring=True):
+    if safe:
+        ra_deg = checkarray(ra_deg, double=True)
+        dec_deg = checkarray(dec_deg, double=True)
+    ra_abs = N.absolute(ra_deg)
+    ra_signval = ra_deg/ra_abs
+    ra_sign = N.where(ra_signval > 0, '', '-')
+    ra_hfull = ra_abs / 15.0
+    ra_h = ra_hfull.astype(N.int)
+    ra_mfull = (ra_hfull - ra_h) * 60.0
+    ra_m = ra_mfull.astype(N.int)
+    ra_s = (ra_mfull - ra_m) * 60.0
+    dec_abs = N.absolute(dec_deg) 
+    dec_signval = dec_deg/dec_abs
+    dec_sign = N.where(dec_signval > 0, '', '-')
+    dec_d = dec_abs.astype(N.int)
+    dec_mfull = (dec_abs - dec_d) * 60.0
+    dec_m = dec_mfull.astype(N.int)
+    dec_s = (dec_mfull - dec_m) * 60.0
+    ra_format = '%s%i:%i:%.'+'%i'%min(0,sec_precision-1)+'f'
+    dec_format = '%s%i:%i:%.'+'%i'%min(0,sec_precision)+'f'
+    n = len(ra_deg)
+    if asstring:
+        ra = N.array(n, N.str)
+        dec = N.array(n, N.str)
+        for i in range(n):
+            ra[i] = ra_format%(ra_sign, ra_h, ra_m, ra_s)
+            dec[i] = dec_format%(dec_sign, dec_h, dec_m, dec_s)
+            if n == 1:
+                ra = ra[0]
+                dec = dec[0]
+        return ra, dec
+    else:
+        return ra_signval*ra_h, ra_m, ra_s, dec_signval*dec_d, dec_m, dec_s
+
 def rahms_decdms_to_deg(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, safe=True):
     if safe:
         ra_h, ra_m, ra_s = [checkarray(i, double=True)

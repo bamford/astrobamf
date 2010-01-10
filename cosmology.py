@@ -211,13 +211,17 @@ def vol_ratio(z1, z2, H0=H0_std,
 def vol(zmin, zmax, H0=H0_std,
         omega_m0=omega_m0_std, omega_lambda0=omega_lambda0_std):
     zmax = checkarray(zmax)
+    zmin = checkarray(zmin)
     v = N.zeros(zmax.shape)
-    for i, zmaxi in enumerate(zmax):
-        # function to integrate
-        def intfn(z):
-            return (4*pi * dA_flat(z, H0, omega_m0)**2 * (1+z)**2 * c0 / 
-                    H(z, H0, omega_m0, omega_lambda0))
-        vi, vierr = scipy.integrate.quad(intfn, zmin, zmaxi)
+    # function to integrate
+    def intfn(z):
+        return (4*pi * dA_flat(z, H0, omega_m0)**2 * (1+z)**2 * c0 / 
+                H(z, H0, omega_m0, omega_lambda0))
+    for i in range(len(zmax)):
+        zmini = zmin[i]
+        zmaxi = zmax[i]
+        vi, vierr = scipy.integrate.quadrature(intfn, zmini, zmaxi, tol=1.0e-3)
+        # this tol is easily sufficient for any reasonable zmin, zmax
         v[i] = vi
     if len(v) == 1:
 	v = v[0]
@@ -235,7 +239,7 @@ def zmax(mabs, mapplim, zlow, zhigh, nz=None):
     zlist = N.arange(zhigh+deltaz/10, zlow, -deltaz)
     dmodlist = dmod_flat(zlist)
     mabslist = mapplim - dmodlist
-    i = N.searchsorted(mabslist, mabs)
+    i = N.searchsorted(mabslist, mabs, side='left')
     ihigh = i == nz+1
     N.putmask(i, ihigh, nz)
     ilow = i == 0
@@ -248,7 +252,7 @@ def zmax(mabs, mapplim, zlow, zhigh, nz=None):
     zmax = z1 + s*(mabs-m1)
     N.putmask(zmax, ilow, zhigh)
     N.putmask(zmax, ihigh, zlow)
-    if len(zmax.shape) == 1:
+    if zmax.shape == (1,):
        zmax = zmax[0]
     return zmax
 
@@ -274,7 +278,7 @@ def zmax_size(rkpc, raslim, zlow, zhigh, nz):
     zmax = z1 + s*(rkpc-r1)
     N.putmask(zmax, ilow, zlow)
     N.putmask(zmax, ihigh, zhigh)
-    if len(zmax.shape) == 1:
+    if zmax.shape == (1,):
        zmax = zmax[0]
     return zmax
 
@@ -302,7 +306,7 @@ def zmax_sb(sbabs, sbapplim, zlow, zhigh, nz):
     zmax = z1 + s*(sbabs-sb1)
     N.putmask(zmax, ilow, zhigh)
     N.putmask(zmax, ihigh, zlow)
-    if len(zmax.shape) == 1:
+    if zmax.shape == (1,):
        zmax = zmax[0]
     return zmax
 
@@ -384,8 +388,8 @@ def omega_lambda(z, omega_m0=omega_m0_std, omega_lambda0=omega_lambda0_std):
 # as a function of redshift (eqn. 3)
 def E(z, omega_m0=omega_m0_std, omega_lambda0=omega_lambda0_std):
     omega_total = omega_m0 + omega_lambda0
-    return sqrt(omega_lambda0 + (1.0 - omega_total) * (1.0+z)**2 +
-                omega_m0 * (1.0+z)**3)
+    return N.sqrt(omega_lambda0 + (1.0 - omega_total) * (1.0+z)**2 +
+                  omega_m0 * (1.0+z)**3)
 
 # calculate the Hubble constant at any redshift (eqn. 2)
 def H(z, H0=H0_std, omega_m0=omega_m0_std, omega_lambda0=omega_lambda0_std):

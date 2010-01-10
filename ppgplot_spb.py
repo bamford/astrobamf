@@ -2,7 +2,7 @@
 
 # imports ppgplot functions and sets up useful variables
 
-from ppgplot_numpy import *
+from ppgplot import *
 import numpy as N
 import os
 from os.path import join as pjoin
@@ -114,6 +114,7 @@ def pgsetup(nx=1, ny=1):
     pg_more_colours()
     pgsci(colourIndices["black"])
     pgslw(lw); pgsch(ch); pgscf(cf)
+    pgeras()
 
 def pgaqt():
     pgopen('/aqt')
@@ -123,22 +124,26 @@ def trend_bins(x, y, xlow=None, xhigh=None, xbinwidth=None, nmin=100,
     if xlow is None:  xlow = scoreatpercentile(x, 1)
     if xhigh is None:  xhigh = scoreatpercentile(x, 99)
     if xbinwidth is None:  xbinwidth = (xhigh - xlow) * 100*nmin / len(x)
-    x_bin = N.arange(xlow, xhigh, xbinwidth)
+    x_bin = N.arange(xlow, xhigh+xbinwidth/2.0, xbinwidth)
     n_bin = len(x_bin)
+    xx_bin = N.zeros(n_bin, N.float) - 99999
     y_bin = N.zeros((3, n_bin), N.float) - 99999
     ok = N.ones(n_bin, N.bool)
     for i, xb in enumerate(x_bin):
         inbin = (x >= xb - 0.5*xbinwidth) & (x < xb + 0.5*xbinwidth)
+        x_inbin = x[inbin]
         y_inbin = y[inbin]
         if len(y_inbin) > nmin:
+            xx_bin[i] = median(x_inbin)
             y_bin[0, i] = median(y_inbin)
             y_bin[1, i] = scoreatpercentile(y_inbin, lowpc)
             y_bin[2, i] = scoreatpercentile(y_inbin, highpc)
         else:
             ok[i] = False
-    x_bin = x_bin[ok]
+    #x_bin = x_bin[ok]
+    xx_bin = xx_bin[ok]
     y_bin = y_bin[:,ok]
-    return x_bin, y_bin
+    return xx_bin, y_bin
 
 def bin_array(d, nbin, low, high):
     n = len(d)

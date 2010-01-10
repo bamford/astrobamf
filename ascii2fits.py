@@ -17,7 +17,7 @@ def ascii2fits(infilename, outfilename, sep=None, header=None):
         h.close()
     lines = f.readlines()
     lines = [i.split(sep) for i in lines
-             if ((len(i.strip()) > 0) & (i.strip[0]!='#'))]
+             if ((len(i.strip()) > 0) & (i.strip()[0]!='#'))]
     ncol = len(columns)
     data = {}
     cols = []
