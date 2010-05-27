@@ -114,7 +114,7 @@ def pgsetup(nx=1, ny=1):
     pg_more_colours()
     pgsci(colourIndices["black"])
     pgslw(lw); pgsch(ch); pgscf(cf)
-    pgeras()
+    #pgeras()
 
 def pgaqt():
     pgopen('/aqt')

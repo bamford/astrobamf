@@ -17,6 +17,6 @@ def covmat2data(covmat, n, means=None, check=False):
     if means is not None:
         T += means.reshape(means.shape + (1,))
     if check:
-        covmatmc = scipy.cov(T)
+        covmatmc = N.cov(T)
         print 'MC covariance matrix OK?', N.all((covmatmc-covmat) < 1e-9)
     return T

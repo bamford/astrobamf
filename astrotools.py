@@ -10,6 +10,9 @@ import numpy as N
 #from ppgplot_spb import *
 from checkarray import checkarray
 from cosmology import *
+import string
+import sys
+import copy
 
 # convert strings of RA (hh:mm:ss.s) and Dec (dd:mm:ss.s) in to
 # decimal degrees (d.ddd)
@@ -39,20 +42,22 @@ def radec_deg_to_hms_dms(ra_deg, dec_deg, sec_precision=3, safe=True,
     ra_s = (ra_mfull - ra_m) * 60.0
     dec_abs = N.absolute(dec_deg) 
     dec_signval = dec_deg/dec_abs
-    dec_sign = N.where(dec_signval > 0, '', '-')
+    dec_sign = N.where(dec_signval > 0, '+', '-')
     dec_d = dec_abs.astype(N.int)
     dec_mfull = (dec_abs - dec_d) * 60.0
     dec_m = dec_mfull.astype(N.int)
     dec_s = (dec_mfull - dec_m) * 60.0
-    ra_format = '%s%i:%i:%.'+'%i'%min(0,sec_precision-1)+'f'
-    dec_format = '%s%i:%i:%.'+'%i'%min(0,sec_precision)+'f'
+    ra_sec_precision = max(0,sec_precision-1)
+    dec_sec_precision = max(0,sec_precision)
+    ra_format = '%s%02i:%02i:%'+'0%i.%i'%(3+ra_sec_precision, ra_sec_precision)+'f'
+    dec_format = '%s%02i:%02i:%'+'0%i.%i'%(3+dec_sec_precision, dec_sec_precision)+'f'
     n = len(ra_deg)
     if asstring:
-        ra = N.array(n, N.str)
-        dec = N.array(n, N.str)
+        ra = N.zeros(n, dtype='S%i'%(10+sec_precision))
+        dec = N.zeros(n, dtype='S%i'%(10+sec_precision))
         for i in range(n):
-            ra[i] = ra_format%(ra_sign, ra_h, ra_m, ra_s)
-            dec[i] = dec_format%(dec_sign, dec_h, dec_m, dec_s)
+            ra[i] = ra_format%(ra_sign[i], ra_h[i], ra_m[i], ra_s[i])
+            dec[i] = dec_format%(dec_sign[i], dec_d[i], dec_m[i], dec_s[i])
             if n == 1:
                 ra = ra[0]
                 dec = dec[0]
@@ -359,3 +364,131 @@ def Mr_from_logMstar_baldry06(Mstar, Cur):
     logML = logML_baldry06(Cur)
     Mr = Mr_solar - 2.5*(Mstar - logML)
     return Mr
+
+# Utilties for matching catalogs by RA & Dec or ID
+# H. Ferguson 11/22/05
+
+def matchsorted(ra,dec,ra1,dec1,tol):
+    """ Find closest ra,dec within tol to a target in an ra-sorted list of ra,dec.
+        Arguments:
+          ra - Right Ascension decimal degrees (numpy sorted in ascending order)
+          dec - Declination decimal degrees (numpy array)
+          ra1 - RA to match (scalar, decimal degrees)
+          ra1 - Dec to match (scalar, decimal degrees)
+          tol - Matching tolerance in decimal degrees. 
+        Returns:
+          ibest - index of the best match within tol; -1 if no match within tol
+          sep - separation (defaults to tol if no match within tol)
+    """
+    i1 = N.searchsorted(ra,ra1-tol)-1
+    i2 = N.searchsorted(ra,ra1+tol)+1
+    if i1 < 0:
+        i1 = 0
+    sep = calc_ang_dist(ra[i1:i2],dec[i1:i2],ra1,dec1, units='degrees', safe=False)
+    indices = N.argsort(sep)
+    if sep[indices[0]] > tol:
+        return -1, tol
+    ibest = indices[0] + i1
+    return ibest, sep[indices[0]]
+    
+def matchpos(ra1,dec1,ra2,dec2,tol):
+    """ Match two sets of ra,dec within a tolerance.
+        Longer catalog should go first
+        Arguments:
+          ra1 - Right Ascension decimal degrees (numpy array)
+          dec1 - Declination decimal degrees (numpy array)
+          ra2 - Right Ascension decimal degrees (numpy array)
+          dec2 - Declination decimal degrees (numpy array)
+          tol - Matching tolerance in decimal degrees. 
+        Returns:
+          ibest - indices of the best matches within tol; -1 if no match within tol
+          sep - separations (defaults to tol if no match within tol)
+    """
+    indices = N.argsort(ra1)
+    rasorted = ra1[indices]
+    decsorted = dec1[indices]
+    ibest = []
+    sep = []
+    m = len(ra1)
+    n = len(ra2)
+    print '%i rows in catalog 1,  %i rows in catalog 2'%(m, n)
+    npc = n//100
+    print '%:',
+    for i in range(n):
+        if i%npc == 0:
+            print i//npc,
+            sys.stdout.flush()
+        j,s = matchsorted(rasorted,decsorted,ra2[i],dec2[i],tol)
+        if j < 0:
+            ibest += [j]
+        else:
+            ibest += [indices[j]]
+        sep += [s]
+    print
+    return N.array(ibest), N.array(sep)
+
+def matchjoin(si1,si2,ibest,sep=[],dict1={},dict2={}):
+    """ Keep only elements that match in both catalogs. 
+        Arguments:
+          si1 -- object with data arrays as attributes (e.g. si1.mag_auto, si1.id)
+          si2 -- object with data arrays as attributes 
+          ibest -- indices of si1 that match si2 (in order of si2)
+        Keyword Arguments:
+          sep -- array of separations, will be added as an attribute to second object
+          dict1 -- dictionary of attributes for si1 (e.g. {'mag_auto':0,'id':1} )
+          dict2 -- dictionary of attributes for si2 
+        The objects si1 and si2 would normally be sextractor objects returned
+        by sextutils.sextractor(). In that case, the column names are stored in
+        si1._d and si2._d. If the objects are not sextractor objects, the user can
+        provide separate dictionaries whose keys are the object attributes 
+	that correspond to the numpy data arrays. 
+       
+        Returns:
+          s1, s2 -- object arrays that include only the matching objects contained
+              in both s1 and s2.
+    """
+    if len(dict1) == 0:
+        dict1 = si1._d
+    if len(dict2) == 0:
+        dict2 = si2._d
+    indices = N.compress(ibest > 0,ibest)
+    # print indices
+    s1 = copy.deepcopy(si1)
+    s2 = copy.deepcopy(si2)
+    for k in dict1.keys():
+        if type(s1.__dict__[k]) == type([]):
+             s1.__dict__[k] = char.array(s1.__dict__[k])
+        s1.__dict__[k] = s1.__dict__[k][indices]
+    flag = ibest > 0
+    for k in dict2.keys():
+        if type(s2.__dict__[k]) == type([]):
+             s2.__dict__[k] = char.array(s2.__dict__[k])
+        s2.__dict__[k] = N.compress(flag,s2.__dict__[k])
+    if len(sep) > 0:
+        s2.separation = N.compress(flag,sep)
+    return s1,s2
+
+def matchids(id1,id2):
+    """ Match two sets of ids. 
+        Returns: 
+          ibest -- array of indices of i1 that match i2; -1 if no match
+    """
+    indices = N.argsort(id1)
+    idsorted = id1[indices]
+    ibest = []
+    for i in range(len(id2)):
+        j = matchidsorted(idsorted,id2[i])
+        if j < 0:
+            ibest += [j]
+        else:
+            ibest += [indices[j]]
+    return N.array(ibest)
+
+def matchidsorted(ids,targetid):
+    """ Find id matches, return index in i1 that matches targetid; -1 if no match. """
+    i1 = N.searchsorted(ids,targetid)
+    if targetid == ids[i1]:
+        ibest = i1
+    else:
+        ibest = -1 
+    return ibest

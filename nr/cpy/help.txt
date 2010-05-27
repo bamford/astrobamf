@@ -1,0 +1,507 @@
+NUMERICAL RECIPES C DISKETTE V2.0
+MACINTOSH VERSION
+
+The contents of this Numerical Recipes C Diskette are 
+Copyright (C) 1986-1992 Numerical Recipes Software
+P.O. Box 243, Cambridge, MA 02238
+Unauthorized reproduction is strictly prohibited.
+
+Please read this document completely before attempting to use the 
+NUMERICAL RECIPES C DISKETTE.  Your use of any programs on this 
+diskette constitutes acceptance of the terms of the DISCLAIMER OF 
+WARRANTY, which is given in full below.  Please read it now.
+
+
+TABLE OF CONTENTS
+1.  What is this diskette?
+2.  How to install the Numerical Recipes files
+3.  ANSI C versus K&R C    (IMPORTANT: Read this section!)
+4.  How to order Numerical Recipes books
+5.  Troubleshooting, and common questions
+6.  How to use the Example programs
+7.  Annotated list of the Numerical Recipes programs
+8.  List of the Example programs
+9.  List of other supplied files
+10.  License Information and DISCLAIMER OF WARRANTY
+    (Section 10 has its own sub-table of contents, which see.)
+
+
+1.  WHAT IS THIS DISKETTE?
+
+     This diskette contains machine-readable C routines from the 
+book "Numerical Recipes in C: The Art of Scientific Computing," 
+Second Edition, published by Cambridge University Press (1992).  If 
+you do not have the book, this diskette will not be very useful to you, 
+since the routine listings on this diskette do not repeat the book's 
+explanations or line-by-line program comments.  This diskette also 
+contains the Example programs from the "Numerical Recipes Example 
+Book (C)".  Details on how to order these books and other items are 
+given below.
+
+2.  HOW TO INSTALL THE NUMERICAL RECIPES FILES
+
+The Numerical Recipes routines consist of more than 600 individual 
+files (including both the recipes and the example routines).  Fully 
+unpacked, this large number of files requires excessive disk space, 
+and, on many Macintosh machines, terribly degrades the performance 
+of the Finder: On some machines it can take several minutes just to 
+open a folder containing more than a few hundred icons.
+
+Luckily, few users ever want to use more than a small number of the 
+routines at any one time.  We therefore supply the routines in the 
+form of a small number of compressed Stuffit archive (".sit") files. 
+We also supply a version of the UnStuffIt unpacking program.  WE 
+STRONGLY RECOMMEND THAT YOU UNPACK INDIVIDUAL NUMERICAL 
+RECIPES FILES ONLY AS YOU NEED THEM.  On request, UnStuffIt will 
+create a copy of any desired routine.  You can use, modify, or delete 
+copy: a fresh copy can always be obtained by again using UnStuffIt.
+
+To install the Numerical Recipes archives, simply create an 
+appropriately named folder on your hard disk, and drag all the files 
+from this Numerical Recipes C Diskette into that folder. 
+
+Here is how to unpack one or more routines from the archives: 
+Double-click on the UnStuffIt utility.  When UnStuffIt comes to life, 
+select its File/Open Archive menu item, and open the desired archive 
+(Recipes, Demos, or Other) in the appropriate drive and folder.  After 
+a short delay, you will be presented with a window listing all the 
+procedures.  Scroll through this list and click on those that you wish 
+to unpack (use Command-Click to select more than one at a time, or 
+Shift-Click to select a range), or use the menu item Edit/Select All 
+if you want to unpack all the procedures.  Now click the Extract 
+command at the bottom of the window.  Use its dialog window, first 
+to display the interior of your desired destination folder, and 
+second, to initiate the unpacking (click on Save All).  When the 
+unpacking is completed, select the menu item File/Close to close the 
+archive.
+
+3.  ANSI vs. K&R C   (IMPORTANT: BE SURE TO READ THIS SECTION)
+
+There are two dialects of the C language commonly in use.  The older 
+one is called Kernighan and Ritchie (K&R) C or "traditional" C.  
+Virtually all C compilers for Macintosh can compile K&R C.  The 
+newer dialect, which is fast replacing K&R C, is called ANSI C.  The 
+program listings in the Numerical Recipes books are all in 
+ANSI C.  However, at present, not all C compilers are ANSI 
+compatible.  
+
+That is why this product is supplied as two diskettes.  Each diskette 
+is complete and can be used without any files from the other.  If you 
+are sure that you want K&R C, copy only the files from that diskette 
+to your hard disk.  If you are sure that you want ANSI C, copy only 
+the files from THAT diskette.  If you don't know which you want, 
+then consult your compiler documentation.  If it makes no mention of 
+ANSI C, then it is probably an older compiler that is only K&R, not 
+ANSI, compatible.
+
+You can also install BOTH dialects.  To do this, copy the complete set 
+of files from one diskette into a folder on your hard disk, and then 
+copy ONLY two StuffIt archive files (names ending with "sit") from 
+the other diskette into the same folder .You DON'T need to recopy the 
+archive named "Other", but it does no harm if you do (replacing the 
+first copy).
+
+If you use ANSI C Recipes you must be aware that the header files 
+nr.h and nrutil.h, and the utility files nrutil.c and complex.c, all 
+supplied in the "Other" archive, incorporate both ANSI C and K&R C 
+versions.  To make the ANSI versions active, you must be 
+sure that one of the following macros is defined at compile 
+time: ANSI, __STDC__, NRANSI.
+
+Consult your compiler documentation to learn how to define macros 
+at compile time.  Most ANSI compilers will automatically define 
+__STDC__ if you specify that you want ANSI C conformity.
+
+As further backup, all the ANSI C files on this diskette themselves 
+internally #define NRANSI before accessing the header files nr.h or 
+nrutil.h.  You can also do this in your own programs.  If you run into 
+trouble, it is probably because you have referenced one of these 
+header files in your own program (or compiled nrutil.c or complex.c) 
+without the required #define NRANSI or compiler switch.
+
+If you have a traditional or K&R C compiler, you need not (in fact, 
+must not) define any special macros at compile time.
+
+Incidentally, there are also separate versions of the programs 
+nrutil.c and complex.c in the respective ANSI and K&R archives.  
+These versions are specific to the dialect of the archive that 
+contains them.
+
+Although it is perfectly possible to mix-and-match ANSI and K&R C 
+files in a single program, doing so can be quite tricky.  Don't attempt 
+it unless you are an expert.
+
+4.  HOW TO ORDER NUMERICAL RECIPES BOOKS
+
+Numerical Recipes books, and diskettes for IBM/PC-compatible and 
+Apple Macintosh computers, are published exclusively by Cambridge 
+University Press.  Their address and telephone order number (North 
+American branch) is:
+
+Cambridge University Press, Order Department
+110 Midland Avenue
+Port Chester, NY 10573
+
+telephone: toll-free 800-872-7423 (in NY: 800-227-0247)
+from abroad: 914-937-9600
+
+Outside of North America, orders may be placed with:
+
+Cambridge University Press, Customer Services Department
+Edinburgh Building
+Shaftesbury Road
+Cambridge, CB2 2RU
+U.K. 
+
+fax: (U.K. country code+) 223 315052
+telex: 851 817256 CUPCAM G
+
+The following books are available (prices subject to change):
+
+Numerical Recipes in C, 2nd Edition (hardcover) $49.95
+Numerical Recipes C Example Book, 2nd Ed. (paper) $29.95
+
+Numerical Recipes in FORTRAN, 2nd Edition (hardcover) $49.95
+Numerical Recipes FORTRAN Example Book, 2nd Ed. (paper) $29.95
+
+These First Edition books remain available:
+
+Numerical Recipes in Pascal, Revised Edition (hardcover) $49.95
+Numerical Recipes Example Book (Pascal), Revised Ed. (paper) $29.95
+
+Numerical Recipes Routines and Examples in BASIC (paper) $32.50
+
+Diskettes are available in most combinations of C, FORTRAN, Pascal, 
+BASIC (Microsoft QuickBASIC) and IBM/PC-compatibles or Apple 
+Macintosh.  Contact Cambridge University Press for pricing 
+information.  A TrueBasic diskette is available from TrueBasic Inc., 
+12 Commerce Ave., West Lebanon, NH 03784.
+
+
+5.  TROUBLESHOOTING AND COMMON QUESTIONS
+
+Q. I have tried it several times, but the UnStuffIt utility just does 
+not work on my machine.
+
+A. Write immediately to Numerical Recipes Software, P.O. Box 243, 
+Cambridge, MA 02238 (USA) or fax to 617-863-1739.  Include your 
+telephone or fax number and tell us when we can reach you.  We 
+really want to know about this!
+
+Q. What version of C is used in this diskette?
+
+Two diskettes are supplied, one for K&R (traditional) C, and the 
+other for ANSI (modern) C.
+
+The procedures on the two diskettes are intended to work with all C 
+compilers for the Macintosh.  The programs in the "K&R" archives are 
+written in "textbook Kernighan and Ritchie (K&R) C", and do not make 
+specific reference to Macintosh system calls.  The programs in the 
+"ANSI" archives are in textbook ANSI C.  Among the many C compilers 
+for Macintosh, we recommend Symantec Corporation's Think C (which 
+is ANSI C conformant), and Apple Computer's MPW C (which supports 
+K&R C and, at time of writing, many, but not all, ANSI features). You 
+may need to make minor modifications of the procedures with these 
+and other compilers when including them in your Macintosh-specific 
+application.
+
+For more information, please read Section 2 of this file, which 
+discusses the difference between K&R and ANSI C. 
+
+Q.  My diskette is defective!
+
+A.  If you believe that this diskette is defective in manufacture, 
+return it to the place of purchase for replacement, or contact 
+Cambridge University Press at the address given below.
+
+Q.  I have both the FORTRAN and C diskettes.  Can I install them onto 
+the same machine?
+
+A.  Yes, but it is best if you copy their respective files into different 
+folders.  If you must copy all the files into a single folder, be sure to 
+rename the "NR Help" files (HyperCard stack and text documents) to 
+have unique names, BEFORE you copy them into a folder.  Otherwise, 
+the help files for the second diskette will overwrite those of the 
+first.  The archives themselves all have unique names and can all 
+share a single copy of UnStuffIt.
+
+Q. What happened to the old Numerical Recipes Example Diskettes? 
+
+A. See the topic "How to use the Example programs," below.
+
+Q. What happened to Numerical Recipes in Pascal? BASIC?
+
+A. The Second Edition of Numerical Recipes is available in C and 
+FORTRAN.  Due to lack of demand, we have not prepared a Second 
+Edition version of the Pascal version.  However, the First Edition of 
+Numerical Recipes in Pascal continues to be available.  Ditto, BASIC.
+
+Q. How do I contact Numerical Recipes Software?
+
+A. See the first question above for our address and fax number. 
+Sorry, we don't take phone calls other than fax.
+
+6.  HOW TO USE THE EXAMPLE PROGRAMS
+
+The Numerical Recipes Example Books (in C and FORTRAN), published 
+by Cambridge University Press, contain descriptions and listings of 
+sample programs that demonstrate and exercise all of the Numerical 
+Recipes routines.  In previous editions, these demonstration 
+programs were available, machine-readable, only as a separate 
+diskette.  Now, they are included, free, on this diskette.  You can try 
+out these demonstration programs without having the Example Book 
+itself. However, to get the maximum benefit of these examples, you 
+will want to read the Example Book's additional descriptions and see 
+the sample output.  Information on ordering the the Example Book 
+was given above.
+
+The Example programs all have names beginning with "X". They must 
+be compiled with, and/or linked to, the routines that they 
+demonstrate. Some of the Example programs also use data files that 
+are supplied on this diskette in the "Other" archive.  (See below for a 
+list of these files.  Also, see below for a list of all the Example 
+programs.)  To find out what routines and/or data files are required 
+by an Example program, read its program listing. 
+
+For instance, the Example program XSVDCMP.C (in the Demos archive) 
+must be compiled and linked with the Recipes SVDCMP.C and 
+PYTHAG.C (in the Recipes archive), and reads data from the file 
+MATRX3.DAT (in the Other archive).
+
+The Example programs are all self-prompting at run time.  Just 
+follow their instructions.
+
+7.  ANNOTATED LIST OF THE NUMERICAL RECIPES PROGRAMS
+
+In the TeachText version, this list is in a separate document.
+
+8.  LIST OF THE EXAMPLE PROGRAMS
+
+These programs are in the Demos archive.
+
+ XAIRY.C       XAMEBSA.C     XAMOEBA.C     XANNEAL.C     XARCODE.C   
+ XAVEVAR.C     XBALANC.C     XBANDEC.C     XBANMUL.C     XBCUCOF.C   
+ XBCUINT.C     XBESCHB.C     XBESSI.C      XBESSI0.C     XBESSI1.C   
+ XBESSIK.C     XBESSJ.C      XBESSJ0.C     XBESSJ1.C     XBESSJY.C   
+ XBESSK.C      XBESSK0.C     XBESSK1.C     XBESSY.C      XBESSY0.C   
+ XBESSY1.C     XBETA.C       XBETAI.C      XBICO.C       XBNLDEV.C   
+ XBRENT.C      XBROYDN.C     XBSSTEP.C     XCALDAT.C     XCHDER.C    
+ XCHEBEV.C     XCHEBFT.C     XCHEBPC.C     XCHINT.C      XCHOLSL.C   
+ XCHSONE.C     XCHSTWO.C     XCISI.C       XCNTAB1.C     XCNTAB2.C   
+ XCONVLV.C     XCORREL.C     XCOSFT1.C     XCOSFT2.C     XCOVSRT.C   
+ XCRANK.C      XCYCLIC.C     XDAWSON.C     XDBRENT.C     XDDPOLY.C   
+ XDECCHK.C     XDF1DIM.C     XDFPMIN.C     XDFRIDR.C     XDFTINT.C   
+ XECLASS.C     XECLAZZ.C     XEI.C         XEIGSRT.C     XELLE.C     
+ XELLF.C       XELLPI.C      XELMHES.C     XERF.C        XERFC.C     
+ XERFCC.C      XEULSUM.C     XEVLMEM.C     XEXPDEV.C     XEXPINT.C   
+ XF1DIM.C      XFACTLN.C     XFACTRL.C     XFASPER.C     XFGAUSS.C   
+ XFIT.C        XFITEXY.C     XFIXRTS.C     XFLEG.C       XFLMOON.C   
+ XFOUR1.C      XFOURFS.C     XFOURN.C      XFPOLY.C      XFRED2.C    
+ XFREDIN.C     XFRENEL.C     XFRPRMN.C     XFTEST.C      XGAMDEV.C   
+ XGAMMLN.C     XGAMMP.C      XGAMMQ.C      XGASDEV.C     XGAUCOF.C   
+ XGAUHER.C     XGAUJAC.C     XGAULAG.C     XGAULEG.C     XGAUSSJ.C   
+ XGCF.C        XGOLDEN.C     XGSER.C       XHPSEL.C      XHPSORT.C   
+ XHQR.C        XHUFFMAN.C    XHUNT.C       XHYPGEO.C     XICRC.C     
+ XIGRAY.C      XINDEXX.C     XIRBIT1.C     XIRBIT2.C     XJACOBI.C   
+ XJULDAY.C     XKENDL1.C     XKENDL2.C     XKS2D1S.C     XKS2D2S.C   
+ XKSONE.C      XKSTWO.C      XLAGUER.C     XLFIT.C       XLINBCG.C   
+ XLINMIN.C     XLOCATE.C     XLUBKSB.C     XLUDCMP.C     XMACHAR.C   
+ XMEDFIT.C     XMEMCOF.C     XMGFAS.C      XMGLIN.C      XMIDPNT.C   
+ XMISER.C      XMMID.C       XMNBRAK.C     XMNEWT.C      XMOMENT.C   
+ XMPPI.C       XMPROVE.C     XMRQCOF.C     XMRQMIN.C     XNEWT.C     
+ XODEINT.C     XORTHOG.C     XPADE.C       XPCCHEB.C     XPCSHFT.C   
+ XPEARSN.C     XPERIOD.C     XPIKSR2.C     XPIKSRT.C     XPLGNDR.C   
+ XPOIDEV.C     XPOLCOE.C     XPOLCOF.C     XPOLDIV.C     XPOLIN2.C   
+ XPOLINT.C     XPOWELL.C     XPREDIC.C     XPROBKS.C     XPSDES.C    
+ XPZEXTR.C     XQGAUS.C      XQRDCMP.C     XQROMB.C      XQROMO.C    
+ XQROOT.C      XQRSOLV.C     XQRUPDT.C     XQSIMP.C      XQTRAP.C    
+ XQUAD3D.C     XRAN.C        XRAN4.C       XRANK.C       XRATINT.C   
+ XRATLSQ.C     XRC.C         XRD.C         XREALFT.C     XRF.C       
+ XRJ.C         XRK4.C        XRKDUMB.C     XRKQS.C       XRLFT3.C    
+ XROFUNC.C     XRTBIS.C      XRTFLSP.C     XRTNEWT.C     XRTSAFE.C   
+ XRTSEC.C      XRZEXTR.C     XSAVGOL.C     XSCRSHO.C     XSELECT.C   
+ XSELIP.C      XSHELL.C      XSIMPLX.C     XSIMPR.C      XSINFT.C    
+ XSNCNDN.C     XSOBSEQ.C     XSOR.C        XSORT.C       XSORT2.C    
+ XSORT3.C      XSPCTRM.C     XSPEAR.C      XSPHBES.C     XSPHFPT.C   
+ XSPLIE2.C     XSPLIN2.C     XSPLINE.C     XSPLINT.C     XSPRSAX.C   
+ XSPRSIN.C     XSPRSPM.C     XSPRSTM.C     XSPRSTP.C     XSPRSTX.C   
+ XSTIFBS.C     XSTIFF.C      XSTOERM.C     XSVBKSB.C     XSVDCMP.C   
+ XSVDFIT.C     XSVDVAR.C     XTOEPLZ.C     XTPTEST.C     XTQLI.C     
+ XTRAPZD.C     XTRED2.C      XTRIDAG.C     XTTEST.C      XTUTEST.C   
+ XTWOFFT.C     XVANDER.C     XVEGAS.C      XVOLTRA.C     XWT1.C      
+ XWTN.C        XZBRAC.C      XZBRAK.C      XZBRENT.C     XZRHQR.C    
+ XZRIDDR.C     XZROOTS.C     
+
+9.  LIST OF FILES IN THE "OTHER" ARCHIVE 
+
+Files in the "Other" archive consist of:
+
+Numerical recipes utility files, which you will often need to compile 
+and link to your programs:
+      nrutil.c 
+      complex.c 
+Numerical recipes header files, which you will often need to 
+#include in your programs:
+      nr.h         
+      nrutil.h     
+      complex.h    
+Data files used by some of the Example programs:
+      dates1.dat   
+      fncval.dat   
+      matrx1.dat   
+      matrx2.dat   
+      matrx3.dat   
+      spctrl.dat   
+      table1.dat   
+      table2.dat   
+      tarray.dat   
+      text.dat     
+
+10.  LICENSE INFORMATION TABLE OF CONTENTS
+
+A.  What does your license cover?
+B.  DISCLAIMER OF WARRANTY
+C.  Can you redistribute Numerical Recipes in your programs?
+D.  Licenses for other types of computers
+E.  Educational licenses for single-screen workstations
+F.  Right-to-Copy licenses for courses
+G.  How to contact Numerical Recipes Software
+H.  Additional legal notices
+
+
+A.  WHAT DOES YOUR LICENSE COVER?
+
+As the purchaser of a Numerical Recipes diskette in Macintosh 
+format, you are licensed to install the programs on this diskette 
+onto a single Macintosh computer.  You are not licensed to move the 
+files to any other type of computer, nor to use them on more than a 
+single Macintosh computer for each diskette purchased.  By 
+installing or using the programs, you acknowledge acceptance of the 
+following DISCLAIMER OF WARRANTY:
+
+B.  DISCLAIMER OF WARRANTY 
+
+THE PROGRAMS AND PROCEDURES ON THIS DISKETTE ARE PROVIDED 
+"AS IS" WITHOUT WARRANTY OF ANY KIND.  WE MAKE NO WARRANTIES, 
+EXPRESS OR IMPLIED, THAT THE PROGRAMS AND PROCEDURES ARE 
+FREE OF ERROR, OR ARE CONSISTENT WITH ANY PARTICULAR 
+STANDARD OF MERCHANTABILITY, OR THAT THEY WILL MEET YOUR 
+REQUIREMENTS FOR ANY PARTICULAR APPLICATION.  THEY SHOULD 
+NOT BE RELIED ON FOR SOLVING A PROBLEM WHOSE INCORRECT 
+SOLUTION COULD RESULT IN INJURY TO A PERSON OR LOSS OF 
+PROPERTY.  IF YOU DO USE THE PROGRAMS OR PROCEDURES IN SUCH A 
+MANNER, IT IS AT YOUR OWN RISK. THE AUTHORS AND PUBLISHER 
+DISCLAIM ALL LIABILITY FOR DIRECT, INCIDENTAL, OR 
+CONSEQUENTIAL DAMAGES RESULTING FROM YOUR USE OF THE 
+PROGRAMS OR PROCEDURES ON THIS DISKETTE.  ANY LIABILITY OF 
+SELLER OR MANUFACTURER WILL BE LIMITED EXCLUSIVELY TO 
+PRODUCT REPLACEMENT OF DISKETTES WITH MANUFACTURING 
+DEFECTS.
+
+C.  CAN YOU REDISTRIBUTE NUMERICAL RECIPES IN YOUR PROGRAMS?
+
+If you want to include Numerical Recipes routines in programs that 
+are further distributed (either commercially or non-commercially) 
+you can obtain permission to do so from Numerical Recipes 
+Software.  If the routines are bound into your program executable 
+and are not separately visible to or useable by your users, there is 
+no fee, provided that (i) advance permission is obtained, and (ii) a 
+copyright notice like that on this diskette is embedded in your 
+program executable. (It need not be visible to your users at run 
+time.) Contact Numerical Recipes Software at P.O. Box 243, 
+Cambridge, MA 02238 (USA) [fax 617-863-1739] for details.  In 
+distributing a program containing Numerical Recipes routines, you 
+acknowledge acceptance of the above DISCLAIMER OF WARRANTY, and 
+of the fact that no business relationship is created between your 
+program's users and Numerical  Recipes Software, the authors of the 
+Numerical Recipes books, or Cambridge University Press.
+
+If you want to distribute software that has Numerical Recipes in the 
+form of source code or individually callable object modules, then you 
+must contact Numerical Recipes Software for further information.  
+A fee (per Recipe) is charged, and we normally limit the total 
+number of Recipes distributed to 20.
+
+D.  LICENSES FOR OTHER TYPES OF COMPUTERS
+
+License information for other types of computers (including UNIX 
+workstations and servers, DEC VMS machines, and multiple-user 
+mainframes) is available from Numerical Recipes Software (address 
+above).
+
+For educational and noncommercial users, we offer two 
+"streamlined'' procedures:
+
+E.  EDUCATIONAL LICENSE FOR SINGLE-SCREEN WORKSTATION
+
+If you are affiliated with an educational or not-for-profit research 
+institution that is connected to the Internet, you may license the 
+programs for use on a single workstation, X-terminal, or other 
+terminal (any one screen) as follows: Mail your name, address, and 
+email address; your workstation's hostname, internet address, brand 
+and model number; and a $50 one-time license fee (must accompany 
+order) to Numerical Recipes Software, at the address below.  Be sure 
+to specify the language you want (C or FORTRAN). You will receive, 
+by return mail or email, instructions for downloading the programs 
+electronically.  Upon payment of the fee you may also, if you desire, 
+upload the contents of this diskette to your workstation.
+
+F.  RIGHT-TO-COPY LICENSE FOR COURSES
+
+Instructors at accredited educational institutions who have adopted 
+Numerical Recipes for a course, and who already own a diskette, may 
+license the programs for use in that course as follows: Mail your 
+name, title, and address; the course name, number, dates, and 
+estimated enrollment; and advance payment of $5 per (estimated) 
+student to Numerical Recipes Software, at the address below.  You 
+will receive by return mail a license authorizing you to make copies 
+of your diskette for use by your students, and/or to transfer the 
+programs to a machine accessible to your students (but only for the 
+duration of the course).
+
+HOW TO CONTACT NUMERICAL RECIPES SOFTWARE
+
+Our address is: Numerical Recipes Software
+ P.O. Box 243
+ Cambridge, MA 02238 (USA)
+
+Our fax number is: 617-863-1739.
+
+Sorry, we do not take telephone calls other than fax.
+
+H.  ADDITIONAL LEGAL NOTICES
+
+As a condition of including TeachText on this disk, Apple Computer, 
+Inc.  requires the following labeling:
+
+APPLE COMPUTER, INC. ("APPLE") MAKES NO WARRANTIES, EXPRESS 
+OR IMPLIED, INCLUDING WITHOUT LIMITATION THE IMPLIED 
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR 
+PURPOSE, REGARDING THE APPLE SOFTWARE.  APPLE DOES NOT 
+WARRANT, GUARANTEE OR MAKE ANY REPRESENTATIONS REGARDING 
+THE USE OR THE RESULTS OF THE USE OF THE APPLE SOFTWARE IN 
+TERMS OF ITS CORRECTNESS, ACCURACY, RELIABILITY, CURRENTNESS 
+OR OTHERWISE.  THE ENTIRE RISK AS TO THE RESULTS AND 
+PERFORMANCE OF THE APPLE SOFTWARE IS ASSUMED BY YOU.  THE 
+EXCLUSION OF IMPLIED WARRANTIES IS NOT PERMITTED BY SOME 
+STATES.  THE ABOVE EXCLUSION MAY NOT APPLY TO YOU.
+
+IN NO EVENT WILL APPLE, ITS DIRECTORS, OFFICERS, EMPLOYEES OR 
+AGENTS BE LIABLE TO YOU FOR ANY CONSEQUENTIAL, INCIDENTAL OR 
+INDIRECT DAMAGES (INCLUDING DAMAGES FOR LOSS OF BUSINESS 
+PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, 
+AND THE LIKE) ARISING OUT OF THE USE OR INABILITY TO USE THE 
+APPLE SOFTWARE EVEN IF APPLE HAS BEEN ADVISED OF THE 
+POSSIBILITY OF SUCH DAMAGES.  BECAUSE SOME STATES DO NOT 
+ALLOW THE EXCLUSION OR LIMITATION OF LIABILITY FOR 
+CONSEQUENTIAL OR INCIDENTAL DAMAGES, THE ABOVE LIMITATIONS 
+MAY NOT APPLY TO YOU.  Apple's liability to you for actual damages 
+from any cause whatsoever, and regardless of the form of the action 
+(whether in contract, tort (including negligence), product liability or 
+otherwise), will be limited to $50. 
+
+Macintosh and MPW are trademarks of Apple Computer, Inc.
+TeachText is Copyright (C) 1986-1988 by Apple Computer, Inc.
+UnStuffIt is Copyright (C) 1987, 1988 by Raymond Lau
+Numerical Recipes is a trademark of Numerical Recipes Software
+

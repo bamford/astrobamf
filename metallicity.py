@@ -9,8 +9,8 @@
 from math import *
 import time
 from scipy.optimize import fmin, leastsq
-import numarray as N
-import RandomArray as RA
+import numpy as N
+import numpy.random as RA
 from ppgplot_spb import *
 
 def R23(EW3727, errEW3727, EW4959, errEW4959,
@@ -65,7 +65,7 @@ def oxygen_abundance(R23, O32, KK04=False, recover=False):
 	deltasigma = 0.1
 	if x > xlimit:
 	    print 'R23 and O32 outside oxyab calibration limits'
-	    print 'Attempting to adjust R23 and O32 within their 3-sigma'
+	    print 'Attempting to adjust R23 and O32 within their 5-sigma'
 	    print 'uncertainities to find valid values'
 	    warning = 1
 	while x > xlimit:
@@ -89,9 +89,9 @@ def oxygen_abundance(R23, O32, KK04=False, recover=False):
 		break
 	    else:
 	       x = x - deltasigma*xerr 
-	    if sigma > 3.0:
+	    if sigma > 5.0:
 		print 'Failed to find a solution by adjusting R23 and O32'
-		print 'within their 3-sigma errors'
+		print 'within their 5-sigma errors'
 		return None
 	if sigma > deltasigma/2.0:
 	    xshift = (x-x0)/xerr
@@ -455,7 +455,7 @@ def quadratic(p, x, y):
     return y - (a + b*x + c*x**2)
 
 def stellar_abs_corr(EW4861):
-    # Correct the EW(Hbeta) for stellat absorption,
+    # Correct the EW(Hbeta) for stellar absorption,
     # as described in [KP03] and used by [K03].
     # This is simply a constant 2 Ang added to the EW.
     return EW4861[0] + 2.0, EW4861[1]

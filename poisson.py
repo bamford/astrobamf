@@ -4,7 +4,7 @@
 # Could extend to general CI using Ebeling 2003/4 (astro-ph/0301285),
 # which builds from Gehrels 1986.
 
-import numarray as N
+import numpy as N
 
 def upper_limit_1_sigma(n):
     return (n+1.0)*(1.0 - 1.0/(9.0*(n+1.0)) + 1.0/(3.0*N.sqrt(n+1.0)))**3    

@@ -36,6 +36,9 @@ Mpc_km = 3.0857e19  # km
 # Newton's gravitational constant
 G_N = 6.673e-11  # m**3 kg**(-1) s**(-2)
 
+# Number of square degrees over full sky
+sky_sq_deg = 4*pi * (180/pi)**2
+
 # The distance modulus for a flat universe with
 # omega_matter + omega_lambda = 1
 def dmod_flat(z, H0=H0_std, omega_m0=omega_m0_std):
@@ -165,19 +168,26 @@ def lt_flat_old(z, H0=H0_std, omega_m0=omega_m0_std, dz=None):
 # improved integration method
 def lt_flat(z, H0=H0_std, omega_m0=omega_m0_std):
     omega_lambda = 1.0 - omega_m0
-    # function to integrate
-    def intfn(z1):
-	zfactor = 1.0 + z1
-	return 1.0 / (zfactor * sqrt(zfactor**2 * (1+omega_m0*z1) - 
-				     z1*(2+z1)*omega_lambda))
-    t, terr = scipy.integrate.quad(intfn, 0.0, z)
-    # t currently a fraction of the Hubble time
-    # convert into Gyr
-    mperpc = 3.085677581e16
-    secperday = 31557600
-    H0persec = H0 * 1.0e-3 / mperpc
-    H0perGyr = H0persec * secperday * 1.0e9
-    t = t / H0perGyr
+    z = N.asarray(z)
+    d = N.zeros(z.shape)
+    for i, zi in enumerate(z):
+        # function to integrate
+        def intfn(z1):
+            zfactor = 1.0 + z1
+            return 1.0 / (zfactor * sqrt(zfactor**2 * (1+omega_m0*z1) - 
+                                         z1*(2+z1)*omega_lambda))
+        t, terr = scipy.integrate.quad(intfn, 0.0, zi)
+        # t currently a fraction of the Hubble time
+        # convert into Gyr
+        mperpc = 3.085677581e16
+        secperday = 31557600
+        H0persec = H0 * 1.0e-3 / mperpc
+        H0perGyr = H0persec * secperday * 1.0e9
+        d[i] = t / H0perGyr
+    if len(d) == 1:
+	d = d[0]
+    return d
+
     return t
 
 # calculate age of a flat universe
