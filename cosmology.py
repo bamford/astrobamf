@@ -269,8 +269,11 @@ def zmax(mabs, mapplim, zlow, zhigh, nz=None):
 # calculate the maximum redshift at which an object with absolute
 # size rkpc could be included in a survey limited to apparent
 # size raslim.  Optimised to do many objects in one go.
-def zmax_size(rkpc, raslim, zlow, zhigh, nz):
+def zmax_size(rkpc, raslim, zlow, zhigh, nz=None):
     rkpc = checkarray(rkpc)
+    if nz is None:
+        deltaz = 0.001
+        nz = int((zhigh-zlow)/deltaz)
     deltaz = (zhigh-zlow)/float(nz)
     zlist = N.arange(zlow, zhigh+deltaz/10, deltaz)
     angscalelist = ang_scale_flat(zlist)
@@ -296,8 +299,11 @@ def zmax_size(rkpc, raslim, zlow, zhigh, nz):
 # surface brightness sbabs (could be included in a survey limited to
 # apparent surface brightness sbapplim.
 # Optimised to do many objects in one go.
-def zmax_sb(sbabs, sbapplim, zlow, zhigh, nz):
+def zmax_sb(sbabs, sbapplim, zlow, zhigh, nz=None):
     sbabs = checkarray(sbabs)
+    if nz is None:
+        deltaz = 0.001
+        nz = int((zhigh-zlow)/deltaz)
     deltaz = (zhigh-zlow)/float(nz)
     zlist = N.arange(zhigh+deltaz/10, zlow, -deltaz)
     dmodlist = dmod_flat(zlist)

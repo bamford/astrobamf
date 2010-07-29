@@ -6,10 +6,14 @@ def csv2fits(infilename, outfilename, sep=',', linesep='\n', columns=None):
     lss = [[i.strip('"\'').strip() for i in ls] for ls in (l.split(sep) for l in file(infilename))]
     if columns is None:
         columns = lss[0]
+        data = lss[1:]
+    else:
+        data = lss
     print columns
-    data = lss[1:]
     cols = []
     for i, c in enumerate(columns):
+        if c == 'null':
+            continue
         d = N.array([l[i] for l in data])
         try:
             e = N.where(d != '', d, '-999')

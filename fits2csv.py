@@ -3,14 +3,17 @@ import pyfits
 # This has now been profiled and made around 40 times faster than before!
 
 def fits2csv(infilename, outfilename, sep=',', linesep='\n', maxlength=32,
-             selectednames=None, limit=None, gzipped=False):
+             selectednames=None, limit=None, gzipped=False, keeporder=True):
     d = pyfits.getdata(infilename)
     if limit is not None:
         d = d[eval(limit)]
     if selectednames is None:
         names = d.names
     else:
-        names = [n for n in d.names if n in selectednames]
+        if keeporder:
+            names = [n for n in d.names if n in selectednames]
+        else:
+            names = selectednames
     columns = [(d.field(n)).astype('S%i'%maxlength) for n in names]
     if gzipped:
         import gzip
@@ -24,7 +27,7 @@ def fits2csv(infilename, outfilename, sep=',', linesep='\n', maxlength=32,
     fout.close()
 
 def fits2csv_round(infilename, outfilename, sep=',', linesep='\n', maxlength=32,
-                   selectednames=None, limit=None, round=4):
+                   selectednames=None, limit=None, round=4, gzipped=False):
     d = pyfits.getdata(infilename)
     if limit is not None:
         d = d[eval(limit)]
@@ -38,7 +41,11 @@ def fits2csv_round(infilename, outfilename, sep=',', linesep='\n', maxlength=32,
     othercolumns = dict([(c, d.field(c)) for c in othernames])
     n = len(d)
     del d
-    fout = file(outfilename, 'w')
+    if gzipped:
+        import gzip
+        fout = gzip.open(outfilename, 'wb')
+    else:
+        fout = file(outfilename, 'w')
     fout.write(sep.join(selectednames)+linesep)
     roundformat = '%.' + '%if'%round
     for row in range(n):

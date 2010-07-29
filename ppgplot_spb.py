@@ -12,7 +12,8 @@ from gaussian import gaussian2d
 import sys
 #import nr as nr
 import rostat as rostat
-from scipy.stats import median, scoreatpercentile
+from numpy import median
+from scipy.stats import scoreatpercentile
 from checkarray import checkarray
 
 pgplot_extras_path = '/Users/spb/Work/software/pgplot_extras'
@@ -120,7 +121,7 @@ def pgaqt():
     pgopen('/aqt')
 
 def trend_bins(x, y, xlow=None, xhigh=None, xbinwidth=None, nmin=100,
-               lowpc=2.5, highpc=97.5):
+               lowpc=2.5, highpc=97.5, usemedian=True):
     if xlow is None:  xlow = scoreatpercentile(x, 1)
     if xhigh is None:  xhigh = scoreatpercentile(x, 99)
     if xbinwidth is None:  xbinwidth = (xhigh - xlow) * 100*nmin / len(x)
@@ -135,7 +136,10 @@ def trend_bins(x, y, xlow=None, xhigh=None, xbinwidth=None, nmin=100,
         y_inbin = y[inbin]
         if len(y_inbin) > nmin:
             xx_bin[i] = median(x_inbin)
-            y_bin[0, i] = median(y_inbin)
+            if usemedian:
+                y_bin[0, i] = median(y_inbin)
+            else:
+                y_bin[0, i] = N.mean(y_inbin)
             y_bin[1, i] = scoreatpercentile(y_inbin, lowpc)
             y_bin[2, i] = scoreatpercentile(y_inbin, highpc)
         else:

@@ -127,7 +127,7 @@ def calc_ang_diff(a1, a2):
 
 
 def calc_ang_dist(ra1, dec1, ra2, dec2, units='degrees',
-                  safe=True):
+                  safe=True, keeparray=False):
     DPIBY2 = 0.5 * pi
     
     if safe:
@@ -146,14 +146,13 @@ def calc_ang_dist(ra1, dec1, ra2, dec2, units='degrees',
         
     theta1 = dec1*convDEC + DPIBY2
     theta2 = dec2*convDEC + DPIBY2
-    cosgamma= (N.sin(theta1) * N.sin(theta2) * N.cos((ra1-ra2)*convRA) + 
+    cosgamma = (N.sin(theta1) * N.sin(theta2) * N.cos((ra1-ra2)*convRA) + 
                N.cos(theta1) * N.cos(theta2))
-    
     adist = 0.0 * cosgamma
     ivalid = (cosgamma < 1.0).nonzero()[0]
     if len(ivalid) > 0:
         adist[ivalid] = N.arccos(cosgamma[ivalid]) / convDEC
-    if adist.shape == (1,):
+    if (not keeparray) and (adist.shape == (1,)):
         return adist[0]
     else:
         return adist
@@ -384,7 +383,8 @@ def matchsorted(ra,dec,ra1,dec1,tol):
     i2 = N.searchsorted(ra,ra1+tol)+1
     if i1 < 0:
         i1 = 0
-    sep = calc_ang_dist(ra[i1:i2],dec[i1:i2],ra1,dec1, units='degrees', safe=False)
+    sep = calc_ang_dist(ra[i1:i2],dec[i1:i2],ra1,dec1, units='degrees',
+                        safe=False, keeparray=True)
     indices = N.argsort(sep)
     if sep[indices[0]] > tol:
         return -1, tol
@@ -399,11 +399,13 @@ def matchpos(ra1,dec1,ra2,dec2,tol):
           dec1 - Declination decimal degrees (numpy array)
           ra2 - Right Ascension decimal degrees (numpy array)
           dec2 - Declination decimal degrees (numpy array)
-          tol - Matching tolerance in decimal degrees. 
+          tol - Matching tolerance in degrees. 
         Returns:
           ibest - indices of the best matches within tol; -1 if no match within tol
           sep - separations (defaults to tol if no match within tol)
     """
+    ra1, dec1, ra2, dec2 = [checkarray(i, double=True)
+                            for i in (ra1, dec1, ra2, dec2)]
     indices = N.argsort(ra1)
     rasorted = ra1[indices]
     decsorted = dec1[indices]
@@ -412,19 +414,21 @@ def matchpos(ra1,dec1,ra2,dec2,tol):
     m = len(ra1)
     n = len(ra2)
     print '%i rows in catalog 1,  %i rows in catalog 2'%(m, n)
-    npc = n//100
-    print '%:',
+    if n > 1000:
+        npc = n//100
+        print '%:',
     for i in range(n):
-        if i%npc == 0:
-            print i//npc,
-            sys.stdout.flush()
-        j,s = matchsorted(rasorted,decsorted,ra2[i],dec2[i],tol)
+        if n > 1000:
+            if i%npc == 0:
+                print i//npc,
+                sys.stdout.flush()
+        j, s = matchsorted(rasorted,decsorted,ra2[i],dec2[i],tol)
         if j < 0:
             ibest += [j]
         else:
             ibest += [indices[j]]
         sep += [s]
-    print
+    if n > 1000: print
     return N.array(ibest), N.array(sep)
 
 def matchjoin(si1,si2,ibest,sep=[],dict1={},dict2={}):
@@ -476,7 +480,9 @@ def matchids(id1,id2):
     indices = N.argsort(id1)
     idsorted = id1[indices]
     ibest = []
+    print len(id2)
     for i in range(len(id2)):
+        print i
         j = matchidsorted(idsorted,id2[i])
         if j < 0:
             ibest += [j]

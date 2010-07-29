@@ -43,7 +43,7 @@ def combine_fits_tables(tables, outfile, idfield='OBJID'):
         os.remove(outfile)
     tbhdu.writeto(outfile)
 
-def concatenate_fits_tables(tables, outfile):
+def concatenate_fits_tables(tables, outfile, uniquecol=None):
     tmaster = tables[0]
     nhdu = len(tmaster)
     hdus = [pyfits.PrimaryHDU()]
@@ -70,7 +70,11 @@ def concatenate_fits_tables(tables, outfile):
             #if ncols1 != ncolst:
             #    raise ValueError('tables do not all have same number of columns')
             nrows += nrowst
-        hdu = pyfits.new_table(tmaster[i].columns, nrows=nrows)
+        cols = []
+        for j in range(len(tmaster[i].columns)):
+            if tmaster[i].columns.names[j] in names:
+                cols.append(tmaster[i].columns[j])
+        hdu = pyfits.new_table(cols, nrows=nrows)
         print names
         startrow = nrows1
         for t in tables[1:]:
@@ -78,6 +82,9 @@ def concatenate_fits_tables(tables, outfile):
             for name in names:
                 hdu.data.field(name)[startrow:startrow+nrowst]=t[i].data.field(name) 
             startrow += nrowst
+        if uniquecol is not None:
+            ar, idx = N.unique(hdu.data.field(uniquecol), return_index=True)
+            hdu.data = hdu.data[idx]
         hdus.append(hdu)
     hdulist = pyfits.HDUList(hdus)
     hdulist.info()
