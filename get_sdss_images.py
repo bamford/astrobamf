@@ -42,7 +42,7 @@ skyconv = 0.01
 
 def cut_out_objects(data, parents=None, bands=['r'], clobber=False,
                     getmask=True, getatlas=True, getparent=True,
-                    getclean=True):    
+                    getclean=True, sizescale=10):    
     dsel = data[selection()]
     if parents is not None:
         pid = parents.field('objid')
@@ -79,7 +79,7 @@ def cut_out_objects(data, parents=None, bands=['r'], clobber=False,
             log.write('%i objects in field'%nobj+'\n')
             for d in dsel[select]:
                 objid = d.field('objID')
-                size = int(d.field('petroR90_r') * 6.0 / pixscale)
+                size = int(d.field('petroR90_r') * sizescale / pixscale)
                 log.write('*** Object: '+str(objid)+'\n')
                 rowc = d.field('rowc_r')
                 colc = d.field('colc_r')
