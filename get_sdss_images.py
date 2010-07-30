@@ -43,13 +43,11 @@ skyconv = 0.01
 def cut_out_objects(dsel, parents=None, bands=['r'], clobber=False,
                     getmask=True, getatlas=True, getparent=True,
                     getclean=True, sizescale=10):    
-    dsel = data
     if parents is not None:
         pid = parents.field('objid')
         pobj = parents.field('obj')
     else:
         getparent = False
-    #dsel = data
     log = file('../cut_out_objects.log', 'w', buffering=1)
     log.write('%i objects'%len(dsel)+'\n')
     log.write('%i bands'%len(bands)+'\n')
