@@ -48,10 +48,10 @@ def cut_out_objects(dsel, parents=None, bands=['r'], clobber=False,
         pobj = parents.field('obj')
     else:
         getparent = False
-    log = file('../cut_out_objects.log', 'w', buffering=1)
+    log = file('cut_out_objects.log', 'w', buffering=1)
     log.write('%i objects'%len(dsel)+'\n')
     log.write('%i bands'%len(bands)+'\n')
-    catalog = file('../cas_catalog', 'w', buffering=1)
+    catalog = file('cas_catalog', 'w', buffering=1)
     catalog.write('%20s %26s %26s %5s %5s\n'%('objid', 'image', 'mask',
                                               'xc', 'yc'))
     fieldspec = []
