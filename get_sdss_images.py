@@ -40,10 +40,10 @@ skyconv = 0.01
 # run, rerun, camcol, field, obj, objid, petroR90_r,
 # rowc_<bands>, colc_<bands>
 
-def cut_out_objects(data, parents=None, bands=['r'], clobber=False,
+def cut_out_objects(dsel, parents=None, bands=['r'], clobber=False,
                     getmask=True, getatlas=True, getparent=True,
                     getclean=True, sizescale=10):    
-    dsel = data[selection()]
+    dsel = data
     if parents is not None:
         pid = parents.field('objid')
         pobj = parents.field('obj')
@@ -277,8 +277,7 @@ def convert_masks(clobber=False):
             os.system('read_seg %s 0 %s'%(fin, fout))
 
 
-def make_imaging_wget_list(data, bands=['r'], getmask=True, getatlas=True, getcat=False):
-    dsel = data[selection()]
+def make_imaging_wget_list(dsel, bands=['r'], getmask=True, getatlas=True, getcat=False):
     print '%i objects'%len(dsel)
     included = []
     for d in dsel:
