@@ -3,8 +3,15 @@ import pyfits
 # This has now been profiled and made around 40 times faster than before!
 
 def fits2csv(infilename, outfilename, sep=',', linesep='\n', maxlength=32,
-             selectednames=None, limit=None, gzipped=False, keeporder=True):
+             selectednames=None, limit=None, gzipped=False, keeporder=True,
+             blankfill=None):
     d = pyfits.getdata(infilename)
+    rec2csv(d, outfilename, sep, linesep, maxlength,
+            selectednames, limit, gzipped, keeporder, blankfill)
+
+def rec2csv(d, outfilename, sep=',', linesep='\n', maxlength=32,
+            selectednames=None, limit=None, gzipped=False, keeporder=True,
+            blankfill=None):
     if limit is not None:
         d = d[eval(limit)]
     if selectednames is None:
@@ -23,6 +30,10 @@ def fits2csv(infilename, outfilename, sep=',', linesep='\n', maxlength=32,
     fout.write(sep.join(names)+linesep)
     for row in range(len(d)):
 	s = [c[row] for c in columns]
+        if blankfill is not None:
+            for i, si in enumerate(s):
+                if si.strip() == '':
+                    s[i] = blankfill
 	fout.write(sep.join(s)+linesep)
     fout.close()
 

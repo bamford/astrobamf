@@ -15,7 +15,7 @@ import subprocess
 #object_path = '/Volumes/Storage/data/SDSS/gzobjects/' 
 field_path = '/home/ppzsb1/SDSSdata/fields/'
 mask_path = '/home/ppzsb1/SDSSdata/masks/'
-object_path = '/home/ppzsb1/SDSSdata/gzobjects/'
+object_path = '/home/ppzsb1/SDSSdata/objects/'
 fieldid_format = '%(run)06i-%(band)s%(camcol)i-%(field)04i'
 fpC_file_format = 'fpC-%s.fit.gz'
 fpM_file_format = 'fpM-%s.fit'
@@ -81,8 +81,8 @@ def cut_out_objects(data, parents=None, bands=['r'], clobber=False,
                 objid = d.field('objID')
                 size = int(d.field('petroR90_r') * 6.0 / pixscale)
                 log.write('*** Object: '+str(objid)+'\n')
-                rowc = d.field('rowc_%s'%band)
-                colc = d.field('colc_%s'%band)
+                rowc = d.field('rowc_r')
+                colc = d.field('colc_r')
                 obj = d.field('obj')
                 if getparent:
                     parentidx = (pid==objid).nonzero()[0]
