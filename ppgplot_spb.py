@@ -151,7 +151,7 @@ def trend_bins(x, y, xlow=None, xhigh=None, xbinwidth=None, nmin=100,
 
 def bin_array(d, nbin, low, high):
     n = len(d)
-    step = (high-low)/nbin
+    step = (high-low)/float(nbin)
     x_bin = N.arange(nbin) * step + low + step/2.0
     d_bin = N.zeros(nbin)
     for i in range(n):
