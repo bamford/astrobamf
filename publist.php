@@ -37,23 +37,29 @@ function authors_process($authors, $surnames)
     return implode(', ', $limited);
 }
 
-$ukads_url = 'http://ukads.nottingham.ac.uk/';
-$ukads_url .= 'cgi-bin/nph-abs_connect?';
-$ukads_url .= 'db_key=AST&db_key=PRE&qform=AST&';
-$ukads_url .= 'start_nr=1&arxiv_sel=astro-ph&arxiv_sel=gr-qc&';
-$ukads_url .= 'start_mon=&start_year=&nr_to_return=100&start_nr=1&';
-$ukads_url .= 'jou_pick=ALL&article_sel=YES&ref_stems=&ALL&';
-$ukads_url .= 'sort=NDATE&data_type=SHORT_XML&author=';
+//$ads_url = 'http://ukads.nottingham.ac.uk/';
+$ads_url = 'http://adsabs.harvard.edu/';
+$ads_url .= 'cgi-bin/nph-abs_connect?';
+$ads_url .= 'db_key=AST&db_key=PRE&qform=AST&';
+$ads_url .= 'start_nr=1&arxiv_sel=astro-ph&arxiv_sel=gr-qc&';
+$ads_url .= 'start_mon=&start_year=&nr_to_return=100&start_nr=1&';
+$ads_url .= 'jou_pick=ALL&article_sel=YES&ref_stems=&ALL&';
+$ads_url .= 'sort=NDATE&data_type=SHORT_XML&author=';
 
 $n = 'Bamford, Steven P';
 $names = array(urlencode($n));
 $surnames = array('Bamford');
 
-$ukads_url .= implode('%0D%0A', $names);
+$ads_url .= implode('%0D%0A', $names);
 
-$ukads_url_normal = str_replace('SHORT_XML', 'SHORT', $ukads_url);
+$ads_url_normal = str_replace('SHORT_XML', 'SHORT', $ads_url);
+echo 'Automatically retrieved from <a href="' . $ads_url_normal . '">ADS</a>.'."\n";
 
-$xmlstr = wp_remote_fopen($ukads_url);
+//Using normal php method
+//$xmlstr = file_get_contents($ads_url);
+//Using Wordpress method:
+$xmlstr = wp_remote_fopen($ads_url);
+
 $xml = new SimpleXMLElement($xmlstr);
 
 foreach ($xml->record as $record) {

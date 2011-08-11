@@ -1,0 +1,30 @@
+#Backup of store disk
+# store_0 always contains an entire copy of the store disk
+# synced each time this script is run.
+# store_[123] contain previous versions of the files that changed
+# during the last three syncs.
+# store_4 is used to backup store_3 while a sync is underway,
+# then removed upon success
+
+for i in 3 2 1; do
+    mv store_$i store_$(($i+1))
+    mv store_${i}_info store_$(($i+1))_info;
+done
+
+mv store_0_info store_1_info
+
+echo Start: `date` > store_0_info
+
+mkdir store_1
+
+success=`time /usr/local/bin/rsync --rsync-path=/usr/local/bin/rsync -aWx --eahfs --showtogo --exclude "/Volumes/store/.Trash*" --exclude "/Volumes/store/.Spotlight*" --backup --backup-dir "/Volumes/LaptopBackup/store_1/" "/Volumes/store/" "/Volumes/LaptopBackup/store_0/"`
+
+if [[ $success == 0 ]]; then
+   rm store_4 store_4_info;
+else
+   echo 'Warning: store backup did not complete successfully'
+   echo 'Warning: store backup did not complete successfully' >> store_0_info;
+fi
+
+echo End: `date` >> store_0_info
+

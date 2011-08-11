@@ -137,7 +137,7 @@ def dc(omega_m0, z):
 	rsom0 = 1.0/sqrt(omega_m0)
 	def rEz(z1):
 	    return rsom0 / sqrt((1.0+z1)**3.0 - 1.0 + rom0)
-	di, dierr = scipy.integrate.quad(rEz, 0.0, zi)
+	di, dierr = scipy.integrate.quad(rEz, 0.0, zi, limit=100)
 	d[i] = di
     if len(d) == 1:
 	d = d[0]
@@ -230,7 +230,7 @@ def vol(zmin, zmax, H0=H0_std,
     for i in range(len(zmax)):
         zmini = zmin[i]
         zmaxi = zmax[i]
-        vi, vierr = scipy.integrate.quadrature(intfn, zmini, zmaxi, tol=1.0e-3)
+        vi, vierr = scipy.integrate.quadrature(intfn, zmini, zmaxi, tol=1.0e-3, maxiter=100)
         # this tol is easily sufficient for any reasonable zmin, zmax
         v[i] = vi
     if len(v) == 1:

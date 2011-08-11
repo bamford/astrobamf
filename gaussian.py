@@ -14,6 +14,12 @@ def multi_g_residuals(p, n, x, y):
     g = multi_gaussian(x, ampl, centre, sigma)
     return y - g    
 
+def g2d_residuals(p, shape, z):
+    ampl, xcentre, ycentre, xsigma, ysigma = p
+    g = gaussian2d(shape, ampl, xcentre, ycentre, xsigma, ysigma)
+    r = N.ravel(z - g)
+    return r
+
 def gaussian(x, ampl, centre, sigma):
     # with unit area
     return (ampl/(sigma*sqrt(2.0*pi)) *
@@ -23,6 +29,10 @@ def gaussian_unit_max(x, ampl, centre, sigma):
     # with unit maximum
     return ampl * N.exp(-(x-centre)**2/(2.0*sigma**2))
 
+def gaussian2dx(x, y, ampl, xcentre, ycentre, xsigma, ysigma):
+    return (ampl/(xsigma*ysigma*2*pi) *
+	    N.exp(-(x-xcentre)**2/(2.0*xsigma**2)) *
+	    N.exp(-(y-ycentre)**2/(2.0*ysigma**2)))
 
 def multi_gaussian_derivatives(x, ampl, centre, sigma, shift):
     dg_dampl = []

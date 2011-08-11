@@ -45,7 +45,7 @@ def O32(EW4959, errEW4959, EW5007, errEW5007,
 # NEED TO IMPLEMENT METHOD FOR DEALING WITH POINTS OFF THE
 # CALIBRATION AS DISCUSSED WITH JOHN.
 
-def oxygen_abundance(R23, O32, KK04=False, recover=False):
+def oxygen_abundance(R23, O32, KK04=False, recover=False, branch='high'):
     # Compute the oxgen abundance 12 + log(O/H)
     # using the analytical expressions of McGaugh (1991, 1998)
     # as given in [K03],
@@ -113,13 +113,16 @@ def oxygen_abundance(R23, O32, KK04=False, recover=False):
 	#    print 'KK04 oxygen abundance would be < 8.4'
 	#    print 'No oxygen abundance estimated'
 	#    return None
-	results = oxyab_KK04_high(x, y, xerr, yerr)
+        results = oxyab_KK04(x, y, xerr, yerr, branch=branch)
 	if None in results:
 	    return None
 	else:
 	    oxyab, oxyaberr = results
     else:
-	results = oxyab_M91_high(x, y, xerr, yerr)
+        if branch == 'low':
+            results = oxyab_M91_low(x, y, xerr, yerr)
+        else:
+            results = oxyab_M91_high(x, y, xerr, yerr)
 	if None in results:
 	    return None
 	else:

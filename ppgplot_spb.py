@@ -16,7 +16,7 @@ from numpy import median
 from scipy.stats import scoreatpercentile
 from checkarray import checkarray
 
-pgplot_extras_path = '/Users/spb/Work/software/pgplot_extras'
+pgplot_extras_path = '/Users/spb/Software/pgplot_extras'
 
 # Point style to use for plots
 pointStyles = {"dot": 17, "point": 1, "square": 0, "plus": 2, "asterisk": 3,
@@ -149,15 +149,20 @@ def trend_bins(x, y, xlow=None, xhigh=None, xbinwidth=None, nmin=100,
     y_bin = y_bin[:,ok]
     return xx_bin, y_bin
 
-def bin_array(d, nbin, low, high):
+def bin_array(d, nbin, low, high, weights=None):
     n = len(d)
     step = (high-low)/float(nbin)
     x_bin = N.arange(nbin) * step + low + step/2.0
-    d_bin = N.zeros(nbin)
+    if weights is None:
+        d_bin = N.zeros(nbin)
+        w = N.ones(n)
+    else:
+        d_bin = N.zeros(nbin, N.float)
+        w = weights
     for i in range(n):
 	bin_index = int((d[i] - low)/step)
 	if 0 <= bin_index < nbin:
-	    d_bin[bin_index] += 1
+	    d_bin[bin_index] += w[i]
     return x_bin, d_bin
 
 def bin_array_2d(x, y, nxbin, xlow, xhigh, nybin, ylow, yhigh,

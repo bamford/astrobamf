@@ -140,7 +140,7 @@ def calc_ang_dist(ra1, dec1, ra2, dec2, units='degrees',
     elif units == "radians":
         convRA = 1.0
         convDEC = 1.0
-    else:
+    else: # degrees
         convRA = pi / 180.0
         convDEC = pi / 180.0
         

@@ -8,6 +8,8 @@ DROP FUNCTION flux_from_asinh_mag
 DROP FUNCTION fluxerr_from_asinh_mag
 DROP FUNCTION calc_cmodel
 DROP FUNCTION calc_cmodelerr
+DROP FUNCTION posang
+DROP FUNCTION aratio
 
 GO
 CREATE FUNCTION asinh
@@ -108,4 +110,40 @@ BEGIN
     set @fcmodel = @fracDev * @fdeV + (1-@fracDev) * @fexp
     set @cmodelMagErr = dbo.asinh_magerr_from_flux(@fcmodelErr, @fcmodel, @b)
     RETURN (@cmodelMagErr)
+END
+
+GO
+CREATE FUNCTION posang( @e1 float, @e2 float )
+RETURNS float
+AS
+BEGIN 
+    declare @posangle float
+    set @posangle = -1000.
+    IF (@e1 != 0.0 AND @e2 != 0.0 AND sqrt(@e1*@e1 + @e2*@e2) <= 1.0)
+        set @posangle = 0.5*atan(@e2/@e1)
+    IF (@e1 = 0.0 AND @e2 > 0.0)
+        set @posangle = 3.14159/4.0
+    IF (@e1 = 0.0 AND @e2 < 0.0)
+        set @posangle = -3.14159/4.0
+    IF (@e2 = 0.0 AND @e1 > 0.0)
+        set @posangle = 0.0
+    IF (@e2 = 0.0 AND @e1 < 0.0)
+        set @posangle = 3.14159/2.0
+    RETURN @posangle
+END
+
+GO
+CREATE FUNCTION aratio( @e1 float, @e2 float )
+RETURNS float
+AS
+BEGIN 
+    declare @aratio float
+    set @aratio = -1000.
+    IF (@e1 != 0.0 AND @e2 != 0.0 AND sqrt(@e1*@e1 + @e2*@e2) <= 1.0)
+        set @aratio = sqrt( (1-@e1/cos(atan(@e2/@e1)))/(1+@e1/cos(atan(@e2/@e1))) )
+    IF (@e1 = 0.0)
+        set @aratio = sqrt( (1-abs(@e2))/(1+abs(@e2)) )
+    IF (@e2 = 0.0)
+        set @aratio = sqrt( (1-abs(@e1))/(1+abs(@e1)) )
+    RETURN @aratio
 END
