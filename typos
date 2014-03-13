@@ -1,0 +1,15 @@
+#!/bin/bash
+ 
+typos="its|it's\
+|there|their|they're\
+|(their (are|is))"
+  
+ 
+if [ "$1" = "" ]; then
+ echo "usage: `basename $0` <file> ..."
+ exit
+fi
+ 
+egrep -i -n --color "\\b($typos)\\b" $*
+ 
+exit $?

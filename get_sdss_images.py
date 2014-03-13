@@ -10,18 +10,19 @@ import gc
 import webbrowser
 from glob import glob
 import subprocess
+import pyfits
 
 #field_path = '/Volumes/Storage/data/SDSS/fields/'
 #object_path = '/Volumes/Storage/data/SDSS/gzobjects/' 
-field_path = '/home/ppzsb1/SDSSdata/fields/'
-mask_path = '/home/ppzsb1/SDSSdata/masks/'
-object_path = '/home/ppzsb1/SDSSdata/objects/'
+field_path = '/data/SDSSdata/fields/'
+mask_path = '/data/SDSSdata/masks/'
+object_path = '/data/SDSSdata/objects/'
 fieldid_format = '%(run)06i-%(band)s%(camcol)i-%(field)04i'
 fpC_file_format = 'fpC-%s.fit.gz'
 fpM_file_format = 'fpM-%s.fit'
 fpA_file_format = 'fpAtlas-%(run)06i-%(camcol)i-%(field)04i.fit'
 drObj_file_format = 'drObj-%(run)06i-%(camcol)i-%(rerun)i-%(field)04i.fit'
-mask_file_format = 'obj-%s.fit'
+mask_file_format = 'obj-%s.fit.gz'
 fpC_format = 'imaging/%(run)i/%(rerun)i/corr/%(camcol)i/fpC-%(run)06i-%(band)s%(camcol)i-%(field)04i.fit.gz'
 fpM_format = 'imaging/%(run)i/%(rerun)i/objcs/%(camcol)i/fpM-%(run)06i-%(band)s%(camcol)i-%(field)04i.fit'
 fpA_format = 'imaging/%(run)i/%(rerun)i/objcs/%(camcol)i/fpAtlas-%(run)06i-%(camcol)i-%(field)04i.fit'
@@ -51,7 +52,7 @@ def cut_out_objects(dsel, parents=None, bands=['r'], clobber=False,
     log = file('cut_out_objects.log', 'w', buffering=1)
     log.write('%i objects'%len(dsel)+'\n')
     log.write('%i bands'%len(bands)+'\n')
-    catalog = file('cas_catalog', 'w', buffering=1)
+    catalog = file('cut_out_catalog', 'w', buffering=1)
     catalog.write('%20s %26s %26s %5s %5s\n'%('objid', 'image', 'mask',
                                               'xc', 'yc'))
     fieldspec = []
@@ -78,6 +79,7 @@ def cut_out_objects(dsel, parents=None, bands=['r'], clobber=False,
             for d in dsel[select]:
                 objid = d.field('objID')
                 size = int(d.field('petroR90_r') * sizescale / pixscale)
+                halfsize = size/2
                 log.write('*** Object: '+str(objid)+'\n')
                 rowc = d.field('rowc_r')
                 colc = d.field('colc_r')
@@ -115,7 +117,6 @@ def cut_out_objects(dsel, parents=None, bands=['r'], clobber=False,
                             unretrieved_fields += 1
                             unretrieved_objects += nobj
                             continue
-                    halfsize = size/2
                     section, sectionheader = get_section(field, rowc, colc,
                                                          halfsize, fieldheader)
                     hdu = pyfits.PrimaryHDU(section, sectionheader)
@@ -300,17 +301,17 @@ def make_imaging_wget_list(dsel, bands=['r'], getmask=True, getatlas=True, getca
     notgot = []
     for i in included:
         fn = i.split('/')[-1]
-        if not os.path.exists(field_path+fn):
+        if not (os.path.exists(field_path+fn) or os.path.exists(field_path+fn+'.gz')):
             notgot.append(i)
     print '%i files to retrieve'%len(notgot)
-    filename='/tmp/sdss.list'
+    filename='/tmp/sdss-wget.list'
     f = open(filename, 'w')
     for i in notgot:
         f.write('%s\n'%i)
     f.close()
-    print 'Execute commands:'
-    print 'export http_proxy="http://wwwcache.nottingham.ac.uk:3128"'
-    print 'wget -c -P %s -B http://das.sdss.org/ -i %s'%(field_path, filename)
+    print 'Execute command:'
+    #print 'export http_proxy="http://wwwcache.nottingham.ac.uk:3128"'
+    print 'wget -nv -c -P %s -B http://das.sdss.org/ -i %s'%(field_path, filename)
     #print 'Execute command:'
     #print 'rsync -vtrLPR rsync://user@rsync.sdss.org/imaging %s --include-from=%s'%(field_path, filename)
     #print "The password is 'sdss'"

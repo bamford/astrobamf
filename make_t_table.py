@@ -1,4 +1,4 @@
-import Numeric as N
+import numpy as N
 import nr
 import sys
 import pickle
@@ -55,9 +55,9 @@ class t_table:
 
 def make_t_table(ndof, nt):
     print 'Making t-table.  This may take a while...'
-    p = N.zeros((ndof,nt), N.Float32)
+    p = N.zeros((ndof,nt), N.float32)
     d = N.zeros((ndof))
-    t = N.zeros((ndof,nt), N.Float32)
+    t = N.zeros((ndof,nt), N.float32)
     print 'df(0-%i):'%(ndof-1),
     for df in range(ndof):
         print df,
@@ -76,7 +76,7 @@ def make_t_table(ndof, nt):
     print
     print 'df(0-%i):'%(ndof-1),
     pdiff = 0.01
-    table = N.zeros((ndof, 100, 3), N.Float32)
+    table = N.zeros((ndof, 100, 3), N.float32)
     for df in range(ndof):
         print df,
         sys.stdout.flush()
