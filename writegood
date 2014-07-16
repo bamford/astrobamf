@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# All of these scripts are from:
+# http://matt.might.net/articles/shell-scripts-for-passive-voice-weasel-words-duplicates/
+
 echo "weasel words: "
 weasel $1
 echo
