@@ -12,7 +12,7 @@ be accompanied by a comment saying where I got it from.  All such code should be
 under the terms of its original license (if any).  Greatest apologies if I have inadvertantly contravened
 any such terms through a combination of enthusiasm and laziness.
 
-With the above proviso, the code in this repository is made available under the CRAPL license (in spirit)
-and the MIT license (in seriousness).
+With the above proviso, the code in this repository is made available under the [CRAPL](https://raw.githubusercontent.com/bamford/astrobamf/master/CRAPL-LICENSE) license (in spirit)
+and the [MIT license](https://raw.githubusercontent.com/bamford/astrobamf/master/LICENSE) (in seriousness).
 
 If you have any questions or issues with the code, please get in touch.
